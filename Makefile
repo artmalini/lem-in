@@ -13,10 +13,10 @@
 NAME = lem-in
 
 INC = -I ./libft
-FLAGS = -Wall -Wextra -Werror -O2
+FLAGS = -Wall -Wextra -Werror -O2 -g -std=c99
 LIB_DIR = libft
 
-SRC_FILES = src3.c
+SRC_FILES = src.c
 
 RED		= \033[31m
 GREEN	= \033[32m
@@ -31,7 +31,8 @@ $(NAME): $(OBJ)
 	#@echo " $(GREEN)Compiling....."
 	@make -C libft
 	#@gcc -o $(NAME) $(FLAGS) $(INC) $(OBJ) -lmlx -framework OpenGL -framework AppKit libft/libft.a
-	@gcc -o $(NAME) $(FLAGS) $(INC) $(OBJ) libft/libft.a
+	#@gcc -o $(NAME) $(FLAGS) $(INC) $(OBJ) libft/libft.a
+	@gcc -o $(NAME) $(INC) $(OBJ) libft/libft.a
 	#@echo " $(CYAN)$(NAME) $(GREY)generated \xF0\x9F\x98\xBA"
 
 %.o: %.c
