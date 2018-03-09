@@ -787,7 +787,8 @@ int			lemin_read(t_lemin *lemin)
 			printf("lemin_read room|%s|\n", line);
 			lemin->room_list = ft_lstpush(lemin->room_list, \
 											init_room(line, flag));
-			//check(lemin->room_list);
+			check(lemin->room_list);
+			printf("flag %d\n", flag);
 			//printf("@@@ lemin->room_list->content|%d|\n", (int)(t_room *)lemin->room_list->content->x);
 			//printf("list->content|%d|\n", lemin->room_list->content->x);
 			flag = NORMAL;
