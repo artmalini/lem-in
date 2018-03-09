@@ -182,7 +182,7 @@ static int		check_hash(char *output)
 		return (2);
 }
 
-t_room		*build_room(char *output, int status)
+t_room		*build_rooms(char *output, int status)
 {
 	char	**rooms;
 	t_room	*param;
@@ -198,28 +198,13 @@ t_room		*build_room(char *output, int status)
 	param->has_ant = 0;
 	param->paths = NULL;
 	lem_split_free(rooms);
-	printf("rooms|%s| status|%d|\n", param->name, status);
+	printf("rooms|%s| status|%d| param->x|%d| param->y|%d|\n", param->name, status, param->x, param->y);
 
 	return (param);
 }
-/*void	build_room(char *output, int status)
-{
-	char	**rooms;
-	t_room	*param;
 
-	if (!(param = (t_room *)malloc(sizeof(t_room))))
-		lem_error(5);
-	rooms = ft_strsplit(output, ' ');
-	param->name = ft_strdup(rooms[0]);
-	param->x = ft_atoi(rooms[1]);
-	param->y = ft_atoi(rooms[2]);
-	param->flag = 0;
-	param->busy = 0;
-	param->has_ant = 0;
-	param->paths = NULL;
-	lem_split_free(rooms);
-	printf("rooms|%s| status|%d|\n", param->name, status);
-}*/
+//t_path		*build_paths(char *output)
+//{}
 
 /*int			count_char(char *out, char c)
 {
@@ -238,7 +223,7 @@ t_room		*build_room(char *output, int status)
 static int			lem_valid_room(char *out)
 {
 	//printf("valid |%s|\n", out);
-	while (ft_isalnum(*out) && *out != 'L' && *out != '#')
+	while (ft_isalnum(*out) && *out != 'L')
 		out++;
 	//else
 	//	return (0);
@@ -260,15 +245,77 @@ static int			lem_valid_room(char *out)
 	return (1);
 }
 
-
-void	check(t_data *map)
+t_room		*lem_val_check_room(char *nbr, t_data *rooms)
 {
-	//printf("check map->x|%d| map->y|%d|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y);
-	while (map)
+	int		done;
+	t_room	*tmp;
+
+	done = 0;
+	while (rooms && !done)
 	{
-		printf("check map->x|%d| map->y|%d|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y);
+		tmp = (t_room *)rooms->data;
+		done = !ft_strcmp(nbr, tmp->name);
+		//printf("room tmp->name %s\n", tmp->name);
+		rooms = rooms->next;
+	}	
+	return (done ? tmp : NULL);
+}
+
+static int			lem_valid_path(t_data *rooms, char *output)
+{
+	int		i;
+	int		val;
+	t_links nbr;
+
+	val = 0;
+	i = -1;
+	if (!ft_isdigit(*output))
+		return (0);
+	while (ft_isdigit(output[++i]))
+		printf("!|%d|\n", output[i]);
+	if (output[i] == '-')
+		i++;
+	else
+		return (0);
+	if (!ft_isdigit(output[i]))
+		return (0);
+	i -= 1;
+	while (ft_isdigit(output[++i]))
+		printf("!|%d|\n", output[i]);
+	if (output[i] != '\0')
+		return (0);
+	nbr.link1 = ft_strsub(output, 0, ft_int_length(ft_atoi(output)));
+	printf("##%s\n", nbr.link1);
+	if (lem_val_check_room(nbr.link1, rooms))
+	{
+		val = 1;
+		printf("ok\n");
+	}
+	return (val);
+}
+
+int		check(t_data *map, char *output)
+{
+	char	**str;	
+	char	*name;
+	int		xx;
+	int		yy;
+
+	str = ft_strsplit(output, ' ');
+	name = ft_strdup(str[0]);////////////////LEAK
+	xx = ft_atoi(str[1]);
+	yy = ft_atoi(str[2]);
+	//printf("x %d y %d\n", xx, yy);
+	//printf("check map->x|%d| map->y|%d| name|%s|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y, ((t_room *)map->data)[0].name);
+	while (map->next)
+	{
+		if ((xx == ((t_room *)map->data)[0].x && yy == ((t_room *)map->data)[0].y) || !ft_strcmp(name, ((t_room *)map->data)[0].name))
+		 	return (0);		
+		//printf("view map->x|%d| map->y|%d|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y);
 		map = map->next;
 	}
+	lem_split_free(str);
+	return (1);
 }
 
 void		map_check_hash(char **output, int *status)
@@ -314,9 +361,15 @@ static int		lem_get_map(t_game *game)
 		else if (lem_valid_room(output) && !game->rooms_done)
 		{
 			//build_room(output, status);
-			game->room_list = ft_lem_push(game->room_list, build_room(output, status));
-			 check(game->room_list);////@@@@@@@@@@@@@
+			game->room_list = ft_lem_push(game->room_list, build_rooms(output, status));
+			if (!check(game->room_list, output))////@@@@@@@@@@@@@
+				break ;
 			status = 2;
+		}
+		else if (lem_valid_path(game->room_list, output) && (game->rooms_done = 1))
+		{
+			printf("output %s\n", output);
+			//game->path_list = ft_lem_push(game->path_list, build_paths(output));
 		}
 		else
 			break ;
@@ -332,7 +385,7 @@ static int		lem_read_map(t_game *game)
 	game->ant_total = lem_get_ants();
 	printf("game->ant_total|%d|\n", game->ant_total);
 	
-	if (game->ant_total == 0 || !lem_get_map(game))
+	if (game->ant_total == 0 || lem_get_map(game))
 		return (3);	
 
 	return (1);
