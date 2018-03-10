@@ -193,7 +193,7 @@ t_room		*build_rooms(char *output, int status)
 	param->name = ft_strdup(rooms[0]);/////////////////LEAK
 	param->x = ft_atoi(rooms[1]);
 	param->y = ft_atoi(rooms[2]);
-	param->flag = 0;
+	param->flag = status;
 	param->busy = 0;
 	param->has_ant = 0;
 	param->paths = NULL;
@@ -203,8 +203,22 @@ t_room		*build_rooms(char *output, int status)
 	return (param);
 }
 
-//t_path		*build_paths(char *output)
-//{}
+t_links		*build_paths(char *out)
+{
+	//char	**path;
+	int		i;
+	t_links	*road;
+
+	i = -1;
+	if (!(road = (t_links *)malloc(sizeof(t_links))))
+		lem_error(5);
+	road->link1 = ft_strsub(out, 0, ft_int_length(ft_atoi(out)));/////////////////LEAK
+	road->link2 = ft_strdup(ft_strchr(out, '-') + 1);/////////////////LEAK
+	//path = ft_strsplit(out, '');
+	//lem_split_free(path);
+	printf("link1|%s| link2|%s|\n", road->link1, road->link2);
+	return (road);
+}
 
 /*int			count_char(char *out, char c)
 {
@@ -245,7 +259,7 @@ static int			lem_valid_room(char *out)
 	return (1);
 }
 
-t_room		*lem_val_check_room(char *nbr, t_data *rooms)
+t_room		*room_name(char *nbr, t_data *rooms)
 {
 	int		done;
 	t_room	*tmp;
@@ -257,17 +271,32 @@ t_room		*lem_val_check_room(char *nbr, t_data *rooms)
 		done = !ft_strcmp(nbr, tmp->name);
 		//printf("room tmp->name %s\n", tmp->name);
 		rooms = rooms->next;
-	}	
-	return (done ? tmp : NULL);
+	}
+	printf("room tmp->name %s done|%d\n", tmp->name, done);
+	return (done ? tmp : 0);
 }
 
-static int			lem_valid_path(t_data *rooms, char *output)
+t_room		*place_to_chamber(t_data *rooms, int direct)
+{
+	int		done;
+	t_room	*tmp;
+
+	done = 0;
+	while (rooms && !done)
+	{
+		tmp = (t_room *)rooms->data;
+		done = tmp->flag == direct ? 1 : 0;
+		//printf("place_to_chamber %s done|%d\n", tmp->name, done);
+		rooms = rooms->next;
+	}
+	printf("place_to_chamber %s done|%d\n", tmp->name, done);
+	return (done ? tmp : 0);
+}
+
+static int			valid_path_cast(char *output)
 {
 	int		i;
-	int		val;
-	t_links nbr;
 
-	val = 0;
 	i = -1;
 	if (!ft_isdigit(*output))
 		return (0);
@@ -284,13 +313,29 @@ static int			lem_valid_path(t_data *rooms, char *output)
 		printf("!|%d|\n", output[i]);
 	if (output[i] != '\0')
 		return (0);
+	return (1);
+}
+
+static int			lem_valid_path(t_data *rooms, char *output)
+{	
+	int		val;
+	t_links nbr;
+
+	val = 0;
+	if (!valid_path_cast(output))
+		return (0);
 	nbr.link1 = ft_strsub(output, 0, ft_int_length(ft_atoi(output)));
-	printf("##%s\n", nbr.link1);
-	if (lem_val_check_room(nbr.link1, rooms))
+	nbr.link2 = ft_strdup(ft_strchr(output, '-') + 1);
+	printf("##%s %s\n", nbr.link1, nbr.link2);
+	if (room_name(nbr.link1, rooms) && room_name(nbr.link2, rooms))
 	{
 		val = 1;
 		printf("ok\n");
 	}
+	free(nbr.link1);
+	free(nbr.link2);
+	nbr.link1 = NULL;
+	nbr.link2 = NULL;
 	return (val);
 }
 
@@ -306,11 +351,13 @@ int		check(t_data *map, char *output)
 	xx = ft_atoi(str[1]);
 	yy = ft_atoi(str[2]);
 	//printf("x %d y %d\n", xx, yy);
-	//printf("check map->x|%d| map->y|%d| name|%s|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y, ((t_room *)map->data)[0].name);
 	while (map->next)
 	{
 		if ((xx == ((t_room *)map->data)[0].x && yy == ((t_room *)map->data)[0].y) || !ft_strcmp(name, ((t_room *)map->data)[0].name))
+		{
+			printf("err yep\n");
 		 	return (0);		
+		}
 		//printf("view map->x|%d| map->y|%d|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y);
 		map = map->next;
 	}
@@ -368,8 +415,8 @@ static int		lem_get_map(t_game *game)
 		}
 		else if (lem_valid_path(game->room_list, output) && (game->rooms_done = 1))
 		{
-			printf("output %s\n", output);
-			//game->path_list = ft_lem_push(game->path_list, build_paths(output));
+			//printf("output %s\n", output);
+			game->path_list = ft_lem_push(game->path_list, build_paths(output));
 		}
 		else
 			break ;
@@ -380,14 +427,30 @@ static int		lem_get_map(t_game *game)
 	return (val);
 }
 
+t_ant		*lem_ant_struct(t_data *room, int ants)
+{
+	int		i;
+	t_ant	*insects;
+
+	i = -1;
+	if (!(insects = (t_ant *)malloc(sizeof(t_ant))))
+		lem_error(5);
+	while (++i < ants)
+	{
+		insects[i].id = i + 1;
+		insects[i].did_turn = 0;
+		insects[i].room = place_to_chamber(room, 1);
+	}
+	return (insects);
+}
+
 static int		lem_read_map(t_game *game)
 {
-	game->ant_total = lem_get_ants();
-	printf("game->ant_total|%d|\n", game->ant_total);
-	
+	game->ant_total = lem_get_ants();//ants count
+	//printf("game->ant_total|%d|\n", game->ant_total);	
 	if (game->ant_total == 0 || lem_get_map(game))
-		return (3);	
-
+		return (0);
+	game->ant_list = lem_ant_struct(game->room_list, game->ant_total);//set ants to start
 	return (1);
 }
 
@@ -411,8 +474,10 @@ static void		lem_parse(int argc, char **argv)
 	if(!(game = (t_game *)malloc(sizeof(t_game))))
 		lem_error(5);
 	lem_struct(game);
-	if (lem_read_map(game) == INVALID_MAP)
+	if (!lem_read_map(game))
 		lem_error(3);
+
+	//lem_set_path(game); ///////////
 
 	ft_memdel((void**)&game);
 }
@@ -430,6 +495,8 @@ int				main(int argc, char **argv)
 	//	lem_error(3);
 	else
 		lem_parse(argc, argv);
+
+	//system("leaks lem-in");
 	//close(fd);	
 	return (0);
 }

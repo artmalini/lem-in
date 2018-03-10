@@ -536,37 +536,6 @@ int			get_ant_total(void)
 
 
 
-/*
-** Find a room, returning the smallest path.
-** If none is found, returns an error.
-*/
-
-int			find_room(void *room, int targetflag)
-{
-	t_room	*current;
-	t_list	*testing;
-	int		smallestpath;
-	int		lastpath;
-
-	current = (t_room *)room;
-	if (current->flag == targetflag)
-		return (0);
-	if (current->busy)
-		return (-1);
-	current->busy = 1;
-	smallestpath = FT_INT_MAX;
-	testing = current->paths;
-	while (testing)
-	{
-		if ((lastpath = find_room(testing->content, targetflag)) < smallestpath
-														&& lastpath != -1)
-			smallestpath = 1 + lastpath;
-		testing = testing->next;
-	}
-	current->busy = 0;
-	return (smallestpath == FT_INT_MAX ? ERROR : smallestpath);
-}
-
 
 
 
@@ -600,9 +569,10 @@ t_room		*get_room_name(char *name, t_list *list)
 	while (list && !done)
 	{
 		tmp = (t_room *)list->content;
-		done = ft_strequ(name, tmp->name);
+		done = ft_strequ(name, tmp->name);		
 		list = list->next;
 	}
+	//printf("get %s\n", ((t_room *)list->content)[0].name);
 	return (done ? tmp : NULL);
 }
 
@@ -766,6 +736,15 @@ void	check(t_list *list)
 		list = list->next;
 	}
 }
+// void	check2(t_list *list)
+// {
+// 	//printf("list->content list->x|%d| list->y|%d|\n", list->x, list->y);
+// 	while (list)
+// 	{
+// 		printf("list->path s|%s|\n", ((t_path *)list->content)[0].door2);
+// 		list = list->next;
+// 	}
+// }
 
 int			lemin_read(t_lemin *lemin)
 {
@@ -777,7 +756,7 @@ int			lemin_read(t_lemin *lemin)
 	lemin->rooms_done = 0;
 	while ((ret = get_next_line(0, &line)) > 0)
 	{
-		printf("line|%s}\n", line);
+		printf("line|%s|\n", line);
 		if (read_command(line))
 		{
 			flag = (flag != NORMAL) ? flag : SET_FLAG(line);
@@ -797,6 +776,7 @@ int			lemin_read(t_lemin *lemin)
 		{
 			printf("lemin_read path|%s|\n", line);
 			lemin->path_list = ft_lstpush(lemin->path_list, init_path(line));
+			//check2(lemin->path_list);
 		}
 		else
 			break ;
@@ -918,6 +898,40 @@ static void	move_ants(t_lemin *lemin, t_ant *ant, t_room *room)
 	print_ant(lemin, ant, room);
 	lemin->moves += 1;
 	return ;
+}
+
+
+
+
+/*
+** Find a room, returning the smallest path.
+** If none is found, returns an error.
+*/
+
+int			find_room(void *room, int targetflag)
+{
+	t_room	*current;
+	t_list	*testing;
+	int		smallestpath;
+	int		lastpath;
+
+	current = (t_room *)room;
+	if (current->flag == targetflag)
+		return (0);
+	if (current->busy)
+		return (-1);
+	current->busy = 1;
+	smallestpath = FT_INT_MAX;
+	testing = current->paths;
+	while (testing)
+	{
+		if ((lastpath = find_room(testing->content, targetflag)) < smallestpath
+														&& lastpath != -1)
+			smallestpath = 1 + lastpath;
+		testing = testing->next;
+	}
+	current->busy = 0;
+	return (smallestpath == FT_INT_MAX ? ERROR : smallestpath);
 }
 
 /*
@@ -1136,8 +1150,7 @@ static int	validate_paths(t_room *rooms, t_list *paths)
 
 int			lemin_validate(t_lemin *lemin)
 {
-	return (validate_paths(get_room_flag(STARTROOM, lemin->room_list), \
-										lemin->path_list) \
+	return (validate_paths(get_room_flag(STARTROOM, lemin->room_list), lemin->path_list) \
 			&& validate_rooms_flag(lemin->room_list, lemin->path_list) \
 			&& validate_rooms_name(lemin->room_list));
 }
@@ -1146,6 +1159,16 @@ int			lemin_validate(t_lemin *lemin)
 
 
 
+void	check1(t_list *list)
+{
+	//printf("list->content list->x|%d| list->y|%d|\n", list->x, list->y);
+	while (list)
+	{
+		//printf("yep\n");
+		printf("path->door1|%s|\n", ((t_path *)list->content)[0].door1);
+		list = list->next;
+	}
+}
 /*
 ** Starts going from every room and path in the list, before being validated.
 */
@@ -1164,13 +1187,26 @@ void		lemin_start(t_lemin *lemin)
 		tmp_path = lemin->path_list;
 		while (tmp_path != 0)
 		{
+			//12 times
+			//printf("dd\n");
 			path = (t_path *)tmp_path->content;
 			if (ft_strequ(path->door1, room->name))
+			{
+				//3times		
 				room->paths = ft_lstpush(room->paths, \
 						get_room_name(path->door2, lemin->room_list));
+				//printf("@@@>door1 %s\n", path->door1);
+				check1(room->paths);//@@@@@@@@@@@@@@@@@@@@				
+			}
 			if (ft_strequ(path->door2, room->name))
+			{
+				//3times
 				room->paths = ft_lstpush(room->paths, \
 						get_room_name(path->door1, lemin->room_list));
+				//printf("@@@>1 %s\n", path->door1);
+				//check1(room->paths);//@@@@@@@@@@@@@@@@@@@@
+			}
+			//check1(room->paths);
 			tmp_path = tmp_path->next;
 		}
 		tmp_room = tmp_room->next;

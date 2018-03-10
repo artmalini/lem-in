@@ -16,7 +16,7 @@ INC = -I ./libft
 FLAGS = -Wall -Wextra -Werror -O2 -g -std=c99
 LIB_DIR = libft
 
-SRC_FILES = src.c
+SRC_FILES = src3.c
 
 RED		= \033[31m
 GREEN	= \033[32m
