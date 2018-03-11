@@ -787,37 +787,7 @@ int			lemin_read(t_lemin *lemin)
 
 
 
-/*
-** Check if an ant can move to a room.
-*/
 
-static int	check_move(t_ant *ant)
-{
-	int		yes;
-	int		may_move;
-	t_list	*ls;
-	t_room	*tmp;
-
-	if (ant->room->flag == ENDROOM)
-		return (0);
-	yes = 1;
-	may_move = 0;
-	if (ant->did_turn)
-		yes = 0;
-	ls = ant->room->paths;
-	while (yes && ls)
-	{
-		tmp = (t_room *)ls->content;
-		if ((!tmp->has_ant && !(tmp->flag == STARTROOM) && tmp != ant->last)
-			|| tmp->flag == ENDROOM)
-		{
-			may_move = 1;
-			break ;
-		}
-		ls = ls->next;
-	}
-	return (yes && may_move);
-}
 
 /*
 ** Checks if the lemin loop should end..
@@ -965,6 +935,38 @@ void		lemin_play(t_lemin *lemin)
 	}
 	if (distance < FT_INT_MAX)
 		move_ants(lemin, lemin->ant_list, next);
+}
+
+/*
+** Check if an ant can move to a room.
+*/
+
+static int	check_move(t_ant *ant)
+{
+	int		yes;
+	int		may_move;
+	t_list	*ls;
+	t_room	*tmp;
+
+	if (ant->room->flag == ENDROOM)
+		return (0);
+	yes = 1;
+	may_move = 0;
+	if (ant->did_turn)
+		yes = 0;
+	ls = ant->room->paths;
+	while (yes && ls)
+	{
+		tmp = (t_room *)ls->content;
+		if ((!tmp->has_ant && !(tmp->flag == STARTROOM) && tmp != ant->last)
+			|| tmp->flag == ENDROOM)
+		{
+			may_move = 1;
+			break ;
+		}
+		ls = ls->next;
+	}
+	return (yes && may_move);
 }
 
 /*
