@@ -212,6 +212,7 @@ t_links		*build_paths(char *out)
 	//i = -1;
 	if (!(road = (t_links *)malloc(sizeof(t_links))))
 		lem_error(5);
+	printf("build_paths\n");
 	road->link1 = ft_strsub(out, 0, ft_int_length(ft_atoi(out)));/////////////////LEAK
 	road->link2 = ft_strdup(ft_strchr(out, '-') + 1);/////////////////LEAK
 	//path = ft_strsplit(out, '');
@@ -301,7 +302,10 @@ static int			valid_path_cast(char *output)
 
 	i = -1;
 	if (!ft_isdigit(*output))
+	{
+		printf("err valid_path_casts\n");
 		return (0);
+	}
 	while (ft_isdigit(output[++i]))
 		printf("!|%d|\n", output[i]);
 	if (output[i] == '-')
@@ -314,7 +318,10 @@ static int			valid_path_cast(char *output)
 	while (ft_isdigit(output[++i]))
 		printf("!|%d|\n", output[i]);
 	if (output[i] != '\0')
+	{
+		printf("err valid_path_casts\n");
 		return (0);
+	}
 	return (1);
 }
 
@@ -469,6 +476,7 @@ void		lem_set_path(t_game *game)
 		}
 		tmp_room = tmp_room->next;
 	}
+	printf("!!!2\n");
 }
 
 t_ant		*lem_ant_struct(t_data *room, int ants)
@@ -482,7 +490,7 @@ t_ant		*lem_ant_struct(t_data *room, int ants)
 	while (++i < ants)
 	{
 		insects[i].id = i + 1;
-		insects[i].did_turn = 0;
+		insects[i].did_turn = 0;		
 		insects[i].room = place_to_chamber(room, 1);
 	}
 	return (insects);
@@ -494,7 +502,7 @@ static int		lem_read_map(t_game *game)
 	//printf("game->ant_total|%d|\n", game->ant_total);	
 	if (game->ant_total == 0 || lem_get_map(game))
 		return (0);
-	game->ant_list = lem_ant_struct(game->room_list, game->ant_total);//set ants to start
+	game->ant_list = lem_ant_struct(game->room_list, game->ant_total);//set ants to start	
 	return (1);
 }
 
@@ -545,18 +553,16 @@ static void	print_ant(t_ant *ant)
 	return ;
 }
 
-/*
-** Move the ants to a room.
-*/
 
 static void	move_ants(t_game *game, t_ant *ant, t_room *room)
 {
 	ant->room->has_ant = 0;
 	ant->last = ant->room;
+	//printf("ant->room %s\n",((t_room *)ant)[0].room);
 	ant->room = room;
 	ant->room->has_ant = 1;
 	print_ant(ant);
-	game->moves += 1;
+	game->moves += 1;///not important
 	return ;
 }
 
@@ -572,6 +578,7 @@ int			find_room(void *room, int targetflag)
 		return (0);
 	if (current->busy)
 		return (-1);
+	//printf("find_room current->flag %d\n", current->flag);
 	current->busy = 1;
 	smallestpath = 20000000;
 	testing = current->paths;
@@ -632,10 +639,7 @@ static int	check_move(t_ant *ant)
 	{
 		tmp = (t_room *)ls->data;
 		if ((!tmp->has_ant && !(tmp->flag == 1) && tmp != ant->last) || tmp->flag == 3)
-		{
-			may_move = 1;
-			break ;
-		}
+			return (1);
 		ls = ls->next;
 	}
 	return (yes && may_move);
@@ -663,7 +667,7 @@ static void		lem_player(t_game *game)
 				{
 					move = 0;
 					game->ant_list += i;
-					//printf("@@@%d\n", game->ant_list);
+					//printf("@@@yep\n");
 					game_play(game);
 					game->ant_list -= i;
 				}

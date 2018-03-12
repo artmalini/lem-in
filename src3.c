@@ -1,5 +1,6 @@
 /*
-Great work with the bonus, really like the animation of the ant in the debug. One improvement would be to store the paths instead of re-calc them every time.
+Great work with the bonus, really like the animation of the ant in the debug.
+ One improvement would be to store the paths instead of re-calc them every time.
 */
 #include <stdio.h>
 # include "libft/libft.h"
