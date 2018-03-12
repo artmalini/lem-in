@@ -101,7 +101,7 @@ t_data	*ft_lem_push(t_data *map, void *param)
 
 	if (!param)
 		lem_error(3);
-	if (!(res = (t_data*)malloc(sizeof(t_data))))
+	if (!(res = (t_data *)malloc(sizeof(t_data))))
 		lem_error(5);
 	if (!map)
 	{
@@ -260,7 +260,7 @@ static int			lem_valid_room(char *out)
 	return (1);
 }
 
-t_room		*room_name(char *nbr, t_data *rooms)
+t_room		*room_name(t_data *rooms, char *nbr)
 {
 	int		done;
 	t_room	*tmp;
@@ -336,7 +336,7 @@ static int			lem_valid_path(t_data *rooms, char *output)
 	nbr.link1 = ft_strsub(output, 0, ft_int_length(ft_atoi(output)));
 	nbr.link2 = ft_strdup(ft_strchr(output, '-') + 1);
 	printf("##%s %s\n", nbr.link1, nbr.link2);
-	if (room_name(nbr.link1, rooms) && room_name(nbr.link2, rooms))
+	if (room_name(rooms, nbr.link1) && room_name(rooms, nbr.link2))
 	{
 		val = 1;
 		printf("ok\n");
@@ -436,7 +436,7 @@ static int		lem_get_map(t_game *game)
 	return (val);
 }
 
-/*void	check1(t_data *list)
+void	check1(t_data *list)
 {
 	//printf("list->content list->x|%d| list->y|%d|\n", list->x, list->y);
 	while (list)
@@ -445,7 +445,7 @@ static int		lem_get_map(t_game *game)
 		printf("path->link1|%s|\n", ((t_links *)list->data)[0].link1);
 		list = list->next;
 	}
-}*/
+}
 
 void		lem_set_path(t_game *game)
 {
@@ -464,12 +464,14 @@ void		lem_set_path(t_game *game)
 			links = (t_links *)tmp_path->data;
 			if (!ft_strcmp(links->link1, room->name))
 			{
-				room->paths = ft_lem_push(room->paths, room_name(links->link2, game->room_list));
-				//check1(room->paths);
+				printf("ga\n");
+				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link2));
+				check1(room->paths);
 			}
 			if (!ft_strcmp(links->link2, room->name))
 			{
-				room->paths = ft_lem_push(room->paths, room_name(links->link1, game->room_list));
+				printf("ga1\n");
+				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link1));
 				//check1(room->paths);		
 			}
 			tmp_path = tmp_path->next;
@@ -484,14 +486,15 @@ t_ant		*lem_ant_struct(t_data *room, int ants)
 	int		i;
 	t_ant	*insects;
 
-	i = -1;
-	if (!(insects = (t_ant *)malloc(sizeof(t_ant))))
+	i = 0;
+	if (!(insects = (t_ant *)malloc(sizeof(t_ant) * ants)))
 		lem_error(5);
-	while (++i < ants)
+	while (i < ants)
 	{
 		insects[i].id = i + 1;
 		insects[i].did_turn = 0;		
 		insects[i].room = place_to_chamber(room, 1);
+		i++;
 	}
 	return (insects);
 }
@@ -503,6 +506,7 @@ static int		lem_read_map(t_game *game)
 	if (game->ant_total == 0 || lem_get_map(game))
 		return (0);
 	game->ant_list = lem_ant_struct(game->room_list, game->ant_total);//set ants to start	
+	//printf("ttttt\n");
 	return (1);
 }
 
@@ -530,12 +534,12 @@ static int		lem_last_ant(t_ant *ants, int numbrs)
 	return (1);
 }
 
-static int		ant_cant_turn(t_ant *ants, int numbrs)
+static int		ants_ready(t_ant *ants, int numbrs)
 {
 	int		i;
 
 	i = -1;
-	while (++i < numbrs && ants != 0)
+	while (++i < numbrs)
 		ants[i].did_turn = 0;
 	return (1);
 }
@@ -566,34 +570,36 @@ static void	move_ants(t_game *game, t_ant *ant, t_room *room)
 	return ;
 }
 
-int			find_room(void *room, int targetflag)
+int			find_room(void *room, int last)
 {
 	t_room	*current;
 	t_data	*testing;
-	int		smallestpath;
+	int		newpath;
 	int		lastpath;
 
 	current = (t_room *)room;
-	if (current->flag == targetflag)
+	if (current->flag == last)
 		return (0);
 	if (current->busy)
 		return (-1);
 	//printf("find_room current->flag %d\n", current->flag);
 	current->busy = 1;
-	smallestpath = 20000000;
+	newpath = 2000000000;
 	testing = current->paths;
+	//printf("testing %s\n", ((t_links *)testing->data)[0].link1);
+	//printf("go ahead\n");
 	while (testing)
 	{
-		if ((lastpath = find_room(testing->data, targetflag)) < smallestpath && lastpath != -1)
-			smallestpath = 1 + lastpath;
+		if ((lastpath = find_room(testing->data, last)) < newpath && lastpath != -1)
+			newpath = 1 + lastpath;
 		testing = testing->next;
 	}
 	current->busy = 0;
-	return (smallestpath == 20000000 ? -1 : smallestpath);
+	return (newpath == 2000000000 ? -1 : newpath);
 }
 
 
-void		game_play(t_game *lemin)
+void		game_play(t_game *game)
 {
 	int		result;
 	int		distance;
@@ -601,77 +607,74 @@ void		game_play(t_game *lemin)
 	t_room	*tmp;
 	t_room	*next;
 
-	distance = 20000000;
-	ls = lemin->ant_list->room->paths;
+	distance = 2000000000;
+	ls = game->ant_list->room->paths;
 	while (ls)
 	{
 		tmp = (t_room *)ls->data;
-		if ((tmp->flag == 3 || !tmp->has_ant) && tmp != lemin->ant_list->last)
+		if ((tmp->flag == 3 || !tmp->has_ant) && tmp != game->ant_list->last)
 		{
+			//printf("go\n");
 			result = find_room(tmp, 3);
 			if (result < distance && result > -1)
 			{
+				//printf("newpath %d\n", result);
 				distance = result;
 				next = tmp;
 			}
 		}
 		ls = ls->next;
 	}
-	if (distance < 20000000)
-		move_ants(lemin, lemin->ant_list, next);
+	if (distance < 2000000000)
+		move_ants(game, game->ant_list, next);
 }
 
-static int	check_move(t_ant *ant)
+static int		check_turn(t_ant *ants)
 {
-	int		yes;
-	int		may_move;
-	t_data	*ls;
-	t_room	*tmp;
+	t_room	*path;
+	t_data	*list;
 
-	if (ant->room->flag == 3)
+	if (ants->room->flag == 3)
 		return (0);
-	yes = 1;
-	may_move = 0;
-	if (ant->did_turn)
-		yes = 0;
-	ls = ant->room->paths;
-	while (yes && ls)
+	list = ants->room->paths;
+	//printf("ants->did_turn %d\n", ants->did_turn);
+	while (list && !ants->did_turn)
 	{
-		tmp = (t_room *)ls->data;
-		if ((!tmp->has_ant && !(tmp->flag == 1) && tmp != ant->last) || tmp->flag == 3)
+		path = (t_room *)list->data;
+		if (path->flag == 3 || (!path->has_ant && path !=
+			ants->last && path->flag != 1))
 			return (1);
-		ls = ls->next;
+		list = list->next;
 	}
-	return (yes && may_move);
+	return (0);
 }
 
 static void		lem_player(t_game *game)
 {
 	int		i;
-	int		move;
+	int		turn;
 
-	move = 0;
-	i = 0;
+	i = -1;
+	turn = 1;
 	//while (!lem_last_ant(game->ant_list, game->ant_total))
 	//{
-		ant_cant_turn(game->ant_list, game->ant_total);
+		ants_ready(game->ant_list, game->ant_total);
 		printf("ss\n");
 		//role_ant(game);
-		while (!move && !lem_last_ant(game->ant_list, game->ant_total))
+		while (turn && !lem_last_ant(game->ant_list, game->ant_total))
 		{
-			i = 0;
-			move = 1;
-			while (i < game->ant_total)
+			i = -1;
+			turn = 0;
+			while (++i < game->ant_total)
 			{
-				if (check_move(game->ant_list + i))
+				if (check_turn(game->ant_list + i))
 				{
-					move = 0;
+					turn = 1;
 					game->ant_list += i;
 					//printf("@@@yep\n");
 					game_play(game);
 					game->ant_list -= i;
 				}
-				i++;
 			}
 			ft_putchar('\n');
 		}
