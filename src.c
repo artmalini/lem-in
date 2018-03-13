@@ -590,14 +590,17 @@ int			find_room(void *room, int last)
 	//printf("go ahead\n");
 	while (testing)
 	{
+		printf(".link1 %s\n", ((t_links *)testing->data)[0].link1);
 		if ((lastpath = find_room(testing->data, last)) < newpath && lastpath != -1)
+		{
+			printf("lastpath %d %s\n", lastpath, ((t_links *)testing->data)[0].link1);
 			newpath = 1 + lastpath;
+		}
 		testing = testing->next;
 	}
 	current->busy = 0;
 	return (newpath == 2000000000 ? -1 : newpath);
 }
-
 
 void		game_play(t_game *game)
 {
