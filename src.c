@@ -470,38 +470,38 @@ static int		lem_get_map(t_game *game)
 	return (val);
 }
 
-void	check1(t_data *list)
+void	check1(t_data *list, int room)
 {
 	//printf("list->content list->x|%d| list->y|%d|\n", list->x, list->y);
 	while (list)
 	{
 		//printf("yep\n");
-		printf("path->link1|%s|\n", ((t_links *)list->data)[0].link1);
+		printf("path->link1|%s| t_data *room->flag|%d|\n", ((t_links *)list->data)[0].link1, room);
 		list = list->next;
 	}
 }
 
-void		lem_set_path(t_game *game)
-{
-	t_room	*room;
-	t_links	*links;
-	t_data	*tmp_room;
-	t_data	*tmp_path;
+// void		lem_set_path1(t_game *game)
+// {
+// 	t_room	*room;
+// 	t_links	*links;
+// 	t_data	*tmp_room;
+// 	t_data	*tmp_path;
 
-	tmp_room = game->room_list;
-	while (tmp_room != 0)
-	{
-		tmp_path = game->path_list;
-		room = (t_room *)tmp_room->data;
-		while (tmp_path != 0)
-		{
-			links = (t_links *)tmp_path->data;
-			tmp_path = tmp_path->next;
-		}
-		tmp_room = tmp_room->next;
-	}
-	printf("!!!2\n");
-}
+// 	tmp_room = game->room_list;
+// 	while (tmp_room != 0)
+// 	{
+// 		tmp_path = game->path_list;
+// 		room = (t_room *)tmp_room->data;
+// 		while (tmp_path != 0)
+// 		{
+// 			links = (t_links *)tmp_path->data;
+// 			tmp_path = tmp_path->next;
+// 		}
+// 		tmp_room = tmp_room->next;
+// 	}
+// 	printf("!!!3\n");
+// }
 
 void		lem_set_path(t_game *game)
 {
@@ -522,12 +522,13 @@ void		lem_set_path(t_game *game)
 			{
 				printf("ga\n");
 				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link2));
-				check1(room->paths);
+				check1(room->paths, room->flag);
 			}
 			if (!ft_strcmp(links->link2, room->name))
 			{
 				printf("ga1\n");
 				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link1));
+				check1(room->paths, room->flag);
 				//check1(room->paths);		
 			}
 			tmp_path = tmp_path->next;
@@ -660,7 +661,7 @@ int			find_room(void *room, int last)
 	//printf("go ahead\n");
 	while (testing)
 	{
-	//	printf(".link1 %s\n", ((t_links *)testing->data)[0].link1);
+		printf(".link1 %s\n", ((t_links *)testing->data)[0].link1);
 		if ((lastpath = find_room(testing->data, last)) < newpath && lastpath != -1)
 		{
 			//printf("lastpath %d %s\n", lastpath, ((t_links *)testing->data)[0].link1);
@@ -703,6 +704,83 @@ void		game_play(t_game *game)
 		move_ants(game, game->ant_list, next);
 }
 
+	// t_room	*room;
+	// t_links	*links;
+	// t_data	*tmp_room;
+	// t_data	*tmp_path;
+
+	// tmp_room = game->room_list;
+	// while (tmp_room != 0)
+	// {
+	// 	tmp_path = game->path_list;
+	// 	room = (t_room *)tmp_room->data;
+
+/*void	ft_lstforeach(t_list *lst, void (*f)())
+{
+	t_list		*tmp;
+
+	tmp = lst;
+	while (tmp)
+	{
+		f(tmp->content);
+		tmp = tmp->next;
+	}
+}
+
+void	ft_lst_rec_free(t_list *first)
+{
+	if (first)
+	{
+		ft_lst_rec_free(first->next);
+		free(first);
+	}
+}
+
+static void	delete_rooms(void *data)
+{
+	t_room	*room;
+
+	room = (t_room *)data;
+	ft_strdel(&room->name);
+	ft_lst_rec_free(room->paths);
+	free(data);
+	data = NULL;
+	return ;
+}*/
+
+
+void	reset_rooms(t_ant *ants, int numbrs)
+{
+	int		i;
+
+	i = -1;
+	while (++i < numbrs && ants != 0)
+	{
+		//printf("ggrt\n");
+		ants[i].room->has_ant = 0;
+		if (ants[i].did_turn == 0)
+		{
+			//printf("name %s\n", ants[i].room->name);
+			//printf("last %s\n", ants[i].last->name);
+			ants[i].last->name = NULL;
+			//ft_lstforeach(lemin->room_list, delete_rooms);
+			//printf("last |%s|\n", ants[i].last->name);
+		}
+	}
+}	
+	// t_room *room;
+	// t_data	*tmp_room;
+
+	// tmp_room = game->room_list;
+	// room = (t_room *)tmp_room->data;
+	// while (tmp_room != 0)
+	// {
+	// 	printf("%s\n", room->name);
+	// 	room->has_ant = 0;
+	// 	tmp_room = tmp_room->next;
+	// }
+
+
 static int		check_turn(t_ant *ants)
 {
 	t_room	*path;
@@ -711,15 +789,20 @@ static int		check_turn(t_ant *ants)
 	if (ants->room->flag == 3)
 		return (0);
 	list = ants->room->paths;
-	//printf("ants->did_turn %d\n", ants->did_turn);
+	//printf("ants->room->has_ant %d\n", ants->room->has_ant);
 	while (list && !ants->did_turn)
 	{
 		path = (t_room *)list->data;
+		//printf("$$$path->has_ant %d path->link1 %d\n", path->has_ant, list->data->link1);
 		if (path->flag == 3 || (!path->has_ant && path !=
 			ants->last && path->flag != 1))
+		{	
+			//printf("pk\n");	
 			return (1);
+		}
 		list = list->next;
 	}
+	printf("rrrrrrrrrrrrrrrrr\n");
 	return (0);
 }
 
@@ -742,17 +825,20 @@ static void		lem_player(t_game *game)
 			turn = 0;
 			while (++i < game->ant_total)
 			{
+				//printf("nni %d\n", i);
 				if (check_turn(game->ant_list + i))
 				{
 					turn = 1;
 					game->ant_list += i;
-					//printf("@@@yep\n");
+					//printf("@@@yei %d\n", i);
 					game_play(game);
 					game->ant_list -= i;
 				}
 			}
 			ft_putchar('\n');
 		}
+		turn = 1;
+		reset_rooms(game->ant_list, game->ant_total);
 		//while (!lem_last_ant(game->ant_list, game->ant_total))
 		//{}
 		printf("lem las %d\n", lem_last_ant1(game->ant_list, game->ant_total));
