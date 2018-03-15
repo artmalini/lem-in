@@ -207,6 +207,7 @@ t_room		*build_rooms(char *output, int status)
 	param->no_way = 0;
 	param->paths = NULL;
 	lem_split_free(rooms);
+	printf("room->name |%s|\n", param->name);
 	printf("rooms|%s| status|%d| param->x|%d| param->y|%d|\n", param->name, status, param->x, param->y);
 
 	return (param);
@@ -390,7 +391,7 @@ int		check(t_data *map, char *output)
 	int		yy;
 
 	str = ft_strsplit(output, ' ');
-	name = ft_strdup(str[0]);////////////////LEAK
+	name = ft_strdup(str[0]);
 	xx = ft_atoi(str[1]);
 	yy = ft_atoi(str[2]);
 	//printf("x %d y %d\n", xx, yy);
@@ -399,12 +400,14 @@ int		check(t_data *map, char *output)
 		if ((xx == ((t_room *)map->data)[0].x && yy == ((t_room *)map->data)[0].y) || !ft_strcmp(name, ((t_room *)map->data)[0].name))
 		{
 			printf("err yep\n");
+			ft_strdel(&name);
 		 	return (0);		
 		}
 		//printf("view map->x|%d| map->y|%d|\n", ((t_room *)map->data)[0].x, ((t_room *)map->data)[0].y);
 		map = map->next;
 	}
 	lem_split_free(str);
+	ft_strdel(&name);
 	return (1);
 }
 
@@ -522,17 +525,20 @@ void		lem_set_path(t_game *game)
 			{
 				printf("ga\n");
 				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link2));
-				check1(room->paths, room->flag);
+				check1(room->paths, room->flag);					
 			}
 			if (!ft_strcmp(links->link2, room->name))
 			{
 				printf("ga1\n");
 				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link1));
 				check1(room->paths, room->flag);
-				//check1(room->paths);		
+				//check1(room->paths);	
 			}
 			tmp_path = tmp_path->next;
 		}
+		//printf("##########################%s\n", room->name);
+		//ft_memdel((void **)&room->name);
+		//ft_strdel(&room->name);
 		tmp_room = tmp_room->next;
 	}
 	printf("!!!2\n");
@@ -661,7 +667,7 @@ int			find_room(void *room, int last)
 	//printf("go ahead\n");
 	while (testing)
 	{
-		printf(".link1 %s\n", ((t_links *)testing->data)[0].link1);
+		//printf(".link1 %s\n", ((t_links *)testing->data)[0].link1);
 		if ((lastpath = find_room(testing->data, last)) < newpath && lastpath != -1)
 		{
 			//printf("lastpath %d %s\n", lastpath, ((t_links *)testing->data)[0].link1);
@@ -715,38 +721,153 @@ void		game_play(t_game *game)
 	// 	tmp_path = game->path_list;
 	// 	room = (t_room *)tmp_room->data;
 
-/*void	ft_lstforeach(t_list *lst, void (*f)())
+void	ft_lstforeach(t_data *lst, void (*f)())
 {
-	t_list		*tmp;
+	t_data		*tmp;
 
 	tmp = lst;
 	while (tmp)
 	{
-		f(tmp->content);
+		f(tmp->data);
 		tmp = tmp->next;
 	}
 }
 
-void	ft_lst_rec_free(t_list *first)
+void	ft_lst_rec_free(t_data *first)
 {
-	if (first)
+	//t_room	*room;
+	t_data	*tmp;
+
+	tmp = first;
+	//room = (t_room *)first;
+	while (first)
 	{
-		ft_lst_rec_free(first->next);
-		free(first);
+		//ft_lst_rec_free(first->next);
+		//room = (t_room *)first;
+		//ft_strdel(&room->name);
+		tmp = first;		
+		//first = NULL;
+		first = first->next;
+		free(tmp);
 	}
 }
+
+// void	ft_lst_rec(t_data *first)
+// {
+// 	t_room	*room;
+
+	
+	
+// 	if (first)
+// 	{
+// 		room = (t_room *)first;
+// 		printf("@@room->name|%s|\n", room->name);	
+// 		ft_lst_rec(first->next);
+// 		ft_strdel(&room->name);
+// 		//free(first);
+// 	}
+// }
 
 static void	delete_rooms(void *data)
 {
 	t_room	*room;
-
+	//int i = -1;
 	room = (t_room *)data;
+	printf("~@@room->name|%s|\n", room->name);
+	//while (++i < 3)
 	ft_strdel(&room->name);
+	printf("~@@room->name|%s|\n", room->name);
 	ft_lst_rec_free(room->paths);
+	//ft_strdel(&room->name);
 	free(data);
 	data = NULL;
 	return ;
+}
+
+
+
+
+
+	// t_room	*room;
+	// t_links	*links;
+	// t_data	*tmp_room;
+	// t_data	*tmp_path;
+
+	// tmp_room = game->room_list;
+	// while (tmp_room != 0)
+	// {
+	// 	tmp_path = game->path_list;
+	// 	room = (t_room *)tmp_room->data;
+
+/*static void	delete_rooms1(t_game *game)
+{
+	t_data	*tmp;
+	t_data	*tmp_room;
+	t_room	*room;
+
+	tmp = game->room_list; 
+	while (tmp != 0)
+	{
+		tmp_room = game->path_list;
+		while (tmp_room != 0)
+		{
+			room = (t_room *)tmp_room->data;
+			printf("room1@@room->name|%s|\n", room->name);
+			if (room->name)
+			{
+				ft_strdel(&room->name);
+				//free(room->paths);
+			}
+			tmp_room = tmp_room->next;
+		}
+		//ft_strdel(&room->name);
+		tmp = tmp->next;
+	}
 }*/
+
+	// room = (t_room *)data;
+	// printf("room1@@room->name|%s|\n", room->name);
+	// ft_strdel(&room->name);
+	// ft_lst_rec_free(room->paths);
+	// free(data);
+	// data = NULL;
+	// return ;
+
+	// while (ls != 0)
+	// {
+	// 	room = (t_room *)ls->data;
+	// 	printf("~~~~~~~~~~~~room->name %s\n", room->name);
+	// 	ls = ls->next;
+	// }
+
+
+// static void	delete_rooms1(void *data)
+// {
+// 	t_room	*room;
+// 	//tmp_room = game->room_list;
+
+// 	//room1 = (t_room *)tmp_room->data;
+// 	room = (t_room *)data;
+// 	printf("room->name|%s|\n", room->name);
+// 	ft_strdel(&room->name);
+// 	printf("room->name|%s|\n", room->name);
+// 	//ft_lst_rec(room->paths);
+// 	//free(data);
+// 	//data = NULL;
+// 	return ;
+// }
+
+static void	delete_paths(void *data)
+{
+	t_links	*path;
+
+	path = (t_links *)data;
+	ft_strdel(&path->link1);
+	ft_strdel(&path->link2);
+	free(data);
+	data = NULL;
+	return ;
+}
 
 
 void	reset_rooms(t_ant *ants, int numbrs)
@@ -846,6 +967,40 @@ static void		lem_player(t_game *game)
 	//}
 }
 
+void		lem_free(t_game *game)
+{
+	//t_room *room;
+	//t_data *tmp_room;
+
+	if (game)
+	{
+		/*if(game)
+		{
+			//delete_rooms1(game->ant_list->room->paths);
+			delete_rooms1(game);
+
+			//ft_lstforeach(game->ant_list->room->paths, delete_rooms1);
+			//ft_lst_rec_free(game->ant_list->room->paths);
+		}*/
+		if (game->room_list)
+		{
+			//tmp_room = game->room_list;
+			//room = (t_room *)tmp_room->data;
+			//ft_lstforeach(room, delete_rooms);
+			ft_lstforeach(game->room_list, delete_rooms);
+			ft_lst_rec_free(game->room_list);
+		}
+		if (game->path_list)
+		{
+			ft_lstforeach(game->path_list, delete_paths);
+			ft_lst_rec_free(game->path_list);
+		}
+		if (game->ant_list)
+			ft_memdel((void **)&game->ant_list);
+		ft_memdel((void **)&game);
+	}
+}
+
 static void		lem_parse(int argc, char **argv)
 {
 	t_game	*game;
@@ -862,7 +1017,8 @@ static void		lem_parse(int argc, char **argv)
 	//lem_valid_room2();//// first end last room IMPORTANT
 	lem_player(game);
 
-	ft_memdel((void**)&game);
+	lem_free(game);
+	//ft_memdel((void**)&game);
 }
 
 int				main(int argc, char **argv)
