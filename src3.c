@@ -174,6 +174,11 @@ t_ant					*init_ants(int total_ants, t_list *rooms);
 t_path					*init_path(char *line);
 t_room					*init_room(char *line, int room_flag);
 
+static void		ft_lstforeach(t_list *lst, void (*f)());
+static void		ft_lst_rec_free(t_list *first);
+static void		delete_rooms(void *data);
+static void		delete_paths(void *data);
+
 
 
 size_t		ft_strlchr(const char *str, int c)
@@ -532,6 +537,31 @@ int			get_ant_total(void)
 	ant_number = (line != NULL && *line != '\0') ? ft_atoi(line) : 0;
 	ft_memdel((void **)&line);
 	return (ant_number);
+	// int		i;
+	// int		val;
+	// char	*output;
+
+	// i = -1;
+	// if (get_next_line(0, &output) != 1)
+	// {
+	// 	ft_memdel((void**)&output);
+	// 	return (0);
+	// }
+	// //printf("@|%s|\n", output);
+	
+	// while (ft_isdigit(output[++i]));
+	// //i -= 1;
+	// //while (ft_isspace(output[++i]));
+	// //printf("@|%c|\n", output[i]);
+	// if (output[i] != '\0')
+	// {
+	// 	ft_memdel((void**)&output);
+	// 	return (0);
+	// }
+	// val = ft_atoi(output);
+	// //printf("@|%s|\n", output);
+	// ft_memdel((void**)&output);
+	// return (val);
 }
 
 
@@ -780,7 +810,7 @@ int			lemin_read(t_lemin *lemin)
 			//check2(lemin->path_list);
 		}
 		else
-			break ;
+			break ;		
 	}
 	ft_memdel((void **)&line);
 	return (ret);

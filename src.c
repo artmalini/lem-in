@@ -50,6 +50,10 @@ typedef struct			s_game
 	t_data				*path_list;
 }						t_game;
 
+void	ft_lstforeach(t_data *lst, void (*f)());
+void	ft_lst_rec_free(t_data *first);
+
+
 int		ft_isprint1(int c)
 {
 	if (c > 32 && c < 127)
@@ -163,16 +167,17 @@ static int		lem_get_ants(void)
 	char	*output;
 
 	i = -1;
-	if (get_next_line(0, &output) < 1)
+	if (get_next_line(0, &output) != 1)
 		lem_error(3);
 	//printf("@|%s|\n", output);
-	val = ft_atoi(output);
+	
 	while (ft_isdigit(output[++i]));
 	//i -= 1;
 	//while (ft_isspace(output[++i]));
 	//printf("@|%c|\n", output[i]);
 	if (output[i] != '\0')
 		lem_error(3);
+	val = ft_atoi(output);
 	//printf("@|%s|\n", output);
 	ft_memdel((void**)&output);
 	return (val);
@@ -376,10 +381,12 @@ static int			lem_valid_path(t_data *rooms, char *output)
 		printf("ok\n");
 	}
 	lem_split_free(path);
-	free(nbr.link1);
-	free(nbr.link2);
-	nbr.link1 = NULL;
-	nbr.link2 = NULL;
+	ft_strdel(&nbr.link1);
+	ft_strdel(&nbr.link2);
+	//free(nbr.link1);
+	//free(nbr.link2);
+	//nbr.link1 = NULL;
+	//nbr.link2 = NULL;
 	return (val);
 }
 
@@ -437,20 +444,10 @@ static int		lem_get_map(t_game *game)
 
 	status = 2;
 	game->rooms_done = 0;
-	while ((val = get_next_line(0, &output)) > 0)
+	while ((val = get_next_line(0, &output)))
 	{		
 		if (check_hash(output))
-		{
 			map_check_hash(&output, &status);
-			//printf("@%s\n", output);
-			// if (status == 2)
-			// {
-			// 	status = check_hash(output);
-			// 	ft_memdel((void **)&output);
-			// }
-			// else
-			// 	status = status;
-		}
 		else if (lem_valid_room(output) && !game->rooms_done)
 		{
 			//build_room(output, status);
@@ -460,17 +457,14 @@ static int		lem_get_map(t_game *game)
 			status = 2;
 		}
 		else if (lem_valid_path(game->room_list, output) && (game->rooms_done = 1))
-		{
-			//printf("output %s\n", output);
 			game->path_list = ft_lem_push(game->path_list, build_paths(output));
-		}
 		else
 			break ;
 		ft_memdel((void **)&output);
 	}
 	ft_memdel((void **)&output);
 	printf("end map val %d\n", val);
-	return (val);
+	return (game->rooms_done == 1 ? val : 1);
 }
 
 void	check1(t_data *list, int room)
@@ -506,12 +500,58 @@ void	check1(t_data *list, int room)
 // 	printf("!!!3\n");
 // }
 
+/*int		review(t_game *game, char *link1, char *link2, char *room_name)
+{
+	t_room	*room;
+	t_links	*links;
+	t_data	*tmp_room;
+	t_data	*tmp_path;
+	char	*tmp_link1;
+	//t_data	*tpaths;
+
+	tmp_room = game->room_list;
+	while (tmp_room != 0)
+	{
+		tmp_path = game->path_list;
+		room = (t_room *)tmp_room->data;
+		while (tmp_path != 0)
+		{
+			links = (t_links *)tmp_path->data;
+			if (!ft_strcmp(link1, room_name) && !ft_strcmp(links->link1, room->name))
+			{
+				//printf("ga\n");
+				tmp_link1 = link1;
+				link1 = link2;
+				link2 = tmp_link1;
+				review(game, link1, link2, room_name);
+				//room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link2));
+				printf("@@@@@@@@@@@@@@@%s\n", room->name);
+				//check1(room->paths, room->flag);					
+			}
+			if (!ft_strcmp(link2, room_name) && !ft_strcmp(links->link2, room->name))
+			{
+				//printf("ga1\n");
+				tmp_link1 = link2;
+				link2 = link1;
+				link1 = tmp_link1;
+				review(game, link1, link2, room_name);
+				//room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link1));
+				printf("###############%s\n", room->name);
+			}
+			tmp_path = tmp_path->next;
+		}
+		tmp_room = tmp_room->next;
+	}
+	return (0);
+}*/
+
 void		lem_set_path(t_game *game)
 {
 	t_room	*room;
 	t_links	*links;
 	t_data	*tmp_room;
 	t_data	*tmp_path;
+	//t_data	*tpaths;
 
 	tmp_room = game->room_list;
 	while (tmp_room != 0)
@@ -524,14 +564,18 @@ void		lem_set_path(t_game *game)
 			if (!ft_strcmp(links->link1, room->name))
 			{
 				printf("ga\n");
+				//review(game, links->link1, links->link2, room->name);
 				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link2));
-				check1(room->paths, room->flag);					
+				printf("@@@@@@@@@@@@@@@%s\n", room->name);
+				//check1(room->paths, room->flag);					
 			}
 			if (!ft_strcmp(links->link2, room->name))
 			{
 				printf("ga1\n");
+				//review(game, links->link1, links->link2, room->name);
 				room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link1));
-				check1(room->paths, room->flag);
+				printf("###############%s\n", room->name);
+				//check1(room->paths, room->flag);
 				//check1(room->paths);	
 			}
 			tmp_path = tmp_path->next;
@@ -562,12 +606,25 @@ t_ant		*lem_ant_struct(t_data *room, int ants)
 	return (insects);
 }
 
+// void	recalc(t_data *paths)
+// {
+// 	t_room	*room;
+
+// 	while (paths)
+// 	{
+// 		room = (t_room *)paths->data;
+// 		printf("$$$$$$$$$|%s|\n", room->name);
+// 		paths = paths->next;
+// 	}
+// }
+
 static int		lem_read_map(t_game *game)
 {
 	game->ant_total = lem_get_ants();//ants count
 	//printf("game->ant_total|%d|\n", game->ant_total);	
 	if (game->ant_total == 0 || lem_get_map(game))
 		return (0);
+	//recalc(game->path_list);
 	game->ant_list = lem_ant_struct(game->room_list, game->ant_total);//set ants to start	
 	//printf("ttttt\n");
 	return (1);
@@ -773,10 +830,10 @@ static void	delete_rooms(void *data)
 	t_room	*room;
 	//int i = -1;
 	room = (t_room *)data;
-	printf("~@@room->name|%s|\n", room->name);
+	//printf("~@@room->name|%s|\n", room->name);
 	//while (++i < 3)
 	ft_strdel(&room->name);
-	printf("~@@room->name|%s|\n", room->name);
+	//printf("~@@room->name|%s|\n", room->name);
 	ft_lst_rec_free(room->paths);
 	//ft_strdel(&room->name);
 	free(data);
@@ -799,31 +856,7 @@ static void	delete_rooms(void *data)
 	// 	tmp_path = game->path_list;
 	// 	room = (t_room *)tmp_room->data;
 
-/*static void	delete_rooms1(t_game *game)
-{
-	t_data	*tmp;
-	t_data	*tmp_room;
-	t_room	*room;
 
-	tmp = game->room_list; 
-	while (tmp != 0)
-	{
-		tmp_room = game->path_list;
-		while (tmp_room != 0)
-		{
-			room = (t_room *)tmp_room->data;
-			printf("room1@@room->name|%s|\n", room->name);
-			if (room->name)
-			{
-				ft_strdel(&room->name);
-				//free(room->paths);
-			}
-			tmp_room = tmp_room->next;
-		}
-		//ft_strdel(&room->name);
-		tmp = tmp->next;
-	}
-}*/
 
 	// room = (t_room *)data;
 	// printf("room1@@room->name|%s|\n", room->name);
@@ -870,25 +903,25 @@ static void	delete_paths(void *data)
 }
 
 
-void	reset_rooms(t_ant *ants, int numbrs)
-{
-	int		i;
+// void	reset_rooms(t_ant *ants, int numbrs)
+// {
+// 	int		i;
 
-	i = -1;
-	while (++i < numbrs && ants != 0)
-	{
-		//printf("ggrt\n");
-		ants[i].room->has_ant = 0;
-		if (ants[i].did_turn == 0)
-		{
-			//printf("name %s\n", ants[i].room->name);
-			//printf("last %s\n", ants[i].last->name);
-			ants[i].last->name = NULL;
-			//ft_lstforeach(lemin->room_list, delete_rooms);
-			//printf("last |%s|\n", ants[i].last->name);
-		}
-	}
-}	
+// 	i = -1;
+// 	while (++i < numbrs && ants != 0)
+// 	{
+// 		//printf("ggrt\n");
+// 		ants[i].room->has_ant = 0;
+// 		if (ants[i].did_turn == 0)
+// 		{
+// 			//printf("name %s\n", ants[i].room->name);
+// 			//printf("last %s\n", ants[i].last->name);
+// 			ants[i].last->name = NULL;
+// 			//ft_lstforeach(lemin->room_list, delete_rooms);
+// 			//printf("last |%s|\n", ants[i].last->name);
+// 		}
+// 	}
+// }	
 	// t_room *room;
 	// t_data	*tmp_room;
 
@@ -914,7 +947,7 @@ static int		check_turn(t_ant *ants)
 	while (list && !ants->did_turn)
 	{
 		path = (t_room *)list->data;
-		//printf("$$$path->has_ant %d path->link1 %d\n", path->has_ant, list->data->link1);
+		//printf("$$$path->has_ant %d path->has_ant %d\n", path->has_ant, path->has_ant);
 		if (path->flag == 3 || (!path->has_ant && path !=
 			ants->last && path->flag != 1))
 		{	
@@ -923,7 +956,7 @@ static int		check_turn(t_ant *ants)
 		}
 		list = list->next;
 	}
-	printf("rrrrrrrrrrrrrrrrr\n");
+	//printf("rrrrrrrrrrrrrrrrr\n");
 	return (0);
 }
 
@@ -937,7 +970,7 @@ static void		lem_player(t_game *game)
 	//while (!lem_last_ant(game->ant_list, game->ant_total))
 	//{
 		ants_ready(game->ant_list, game->ant_total);
-		printf("ss\n");
+		//printf("ss\n");
 		//game_play(game);
 		//role_ant(game);
 		while (turn && !lem_last_ant(game->ant_list, game->ant_total))
@@ -959,7 +992,7 @@ static void		lem_player(t_game *game)
 			ft_putchar('\n');
 		}
 		turn = 1;
-		reset_rooms(game->ant_list, game->ant_total);
+		//reset_rooms(game->ant_list, game->ant_total);
 		//while (!lem_last_ant(game->ant_list, game->ant_total))
 		//{}
 		printf("lem las %d\n", lem_last_ant1(game->ant_list, game->ant_total));
@@ -982,6 +1015,24 @@ void		lem_free(t_game *game)
 			//ft_lstforeach(game->ant_list->room->paths, delete_rooms1);
 			//ft_lst_rec_free(game->ant_list->room->paths);
 		}*/
+		//if (game->room_list)
+		/*if (game->ant_list->room->paths)
+		{
+			t_data	*ls;
+			t_room	*tmp;
+			//t_data	*rw;
+
+
+			ls = game->ant_list->room->paths;
+			while (ls)
+			{
+				tmp = (t_room *)ls->data;
+				printf("##################tmp->flag|%d|\n", tmp->has_ant);
+				//rw =ls;				
+				ls = ls->next;
+				//free(rw);
+			}
+		}*/		
 		if (game->room_list)
 		{
 			//tmp_room = game->room_list;
@@ -1011,7 +1062,10 @@ static void		lem_parse(int argc, char **argv)
 		lem_error(5);
 	lem_struct(game);
 	if (!lem_read_map(game))
+	{
+		lem_free(game);
 		lem_error(3);
+	}
 
 	lem_set_path(game); ///////////
 	//lem_valid_room2();//// first end last room IMPORTANT
