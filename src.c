@@ -561,9 +561,9 @@ int		search(t_data *tmp_room, char *link)
 	return (i);
 }
 
-int		review(t_data *tmp_room, t_data *tmp_path, char *link1)
+int		review(t_data *tmp_room, t_data *tmp_path, char *link1, int i)
 {
-	t_room	*room;
+	//t_room	*room;
 	t_links	*links;
 	t_data	*path;
 	t_data	*rooms;
@@ -572,46 +572,32 @@ int		review(t_data *tmp_room, t_data *tmp_path, char *link1)
 	path = tmp_path;
 	rooms = tmp_room;
 	tmp_link = link1;
-	while (1)// && room->flag != 3
+	while (++i < 2)// && room->flag != 3
 	{
 		while (rooms != 0)
 		{	
-			room = (t_room *)rooms->data;
+			//room = (t_room *)rooms->data;
 			while (path != 0)
 			{
 				links = (t_links *)path->data;
 				//printf("links->link1|%s| |%d|\n", links->link1, room->flag);
 				if (!ft_strcmp(links->link1, tmp_link))
 				{
-					printf("**********************|%s| flag|%d|", links->link1, room->flag);
+					//printf("**********************|%s| flag|%d|", links->link1, room->flag);
 					tmp_link = links->link2;
 					if (search(tmp_room, tmp_link))
 					{
 						//printf("yep+++\n");
 						return (1);
 					}
-					printf(" neighb_link |%s| |%d|\n", tmp_link, ((t_room *)rooms->data)[0].flag);
+					//printf(" neighb_link |%s| |%d|\n", tmp_link, ((t_room *)rooms->data)[0].flag);
 					break ;
 				}
-				// else if (ft_strcmp(links->link1, tmp_link))
-				// {
-				// 	printf("|%d|\n", room->flag);
-				// 	return ;				
-				// }
-
-				// if (!ft_strcmp(room->name, tmp_link)) ((t_links *)path->next->data)[0].link2
-				// {
-				// 	if (room->flag == 3)
-				// 		return ;
-				// 	printf("|%d|\n", room->flag);
-				// }
-				//printf("444\n");
 				path = path->next;
 			}
 			path = tmp_path;
 			rooms = rooms->next;
 		}
-		return (0);
 		rooms = tmp_room;
 	}
 	return (0);
@@ -635,26 +621,23 @@ void		lem_set_path(t_game *game)
 			links = (t_links *)tmp_path->data;
 			if (!ft_strcmp(links->link1, room->name))
 			{
-				printf("ga\n");
-				if (review(game->room_list, game->path_list, links->link1))
+				//printf("ga\n");
+				if (review(game->room_list, game->path_list, links->link1, -1))
 					room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link2));
-				printf("@@@@@@@@@@@@@@@%s\n", room->name);
+				//printf("@@@@@@@@@@@@@@@%s\n", room->name);
 				//check1(room->paths, room->flag);					
 			}
 			if (!ft_strcmp(links->link2, room->name))
 			{
-				printf("ga1\n");
-				if (review(game->room_list, game->path_list, links->link2))
+				//printf("ga1\n");
+				if (review(game->room_list, game->path_list, links->link2, -1))
 					room->paths = ft_lem_push(room->paths, room_name(game->room_list, links->link1));
-				printf("###############%s\n", room->name);
+				//printf("###############%s\n", room->name);
 				//check1(room->paths, room->flag);
 				//check1(room->paths);	
 			}
 			tmp_path = tmp_path->next;
 		}
-		//printf("##########################%s\n", room->name);
-		//ft_memdel((void **)&room->name);
-		//ft_strdel(&room->name);
 		tmp_room = tmp_room->next;
 	}
 	printf("!!!2\n");
@@ -1067,7 +1050,9 @@ static void		lem_player(t_game *game)
 		//reset_rooms(game->ant_list, game->ant_total);
 		//while (!lem_last_ant(game->ant_list, game->ant_total))
 		//{}
-		printf("lem las %d\n", lem_last_ant1(game->ant_list, game->ant_total));
+		printf("lem las %d\n", lem_last_ant1(game->ant_list, game->ant_total));		
+		if (lem_last_ant1(game->ant_list, game->ant_total))//SHOULD be ERROR when ret ant.[id] == 1
+			lem_error(3);		 
 		printf("player game->ant_total|%d| i|%d|\n", game->ant_total, i);
 	//}
 }
