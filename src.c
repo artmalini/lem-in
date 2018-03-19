@@ -260,7 +260,7 @@ static int			lem_valid_room(char *out)
 		printf("no\n");
 		return (0);
 	}
-	while (ft_isprint1(*out))
+	while (ft_isprint1(*out) && *out != '-')
 		out++;
 	//else
 	//	return (0);
@@ -278,51 +278,53 @@ static int			lem_valid_room(char *out)
 		out++;
 	if (*out != '\0')
 		return (0);
-	//printf("valid |%s|\n", out);
+	//printf("!!!!!!!!!!!!!!!room valid |%s|\n", out);
 	return (1);
 }
 
 t_room		*room_name(t_data *rooms, char *nbr)
 {
-	int		done;
-	t_room	*tmp;
+	int		val;
+	t_room	*room;
 
-	done = 0;
-	while (rooms && !done)
+	val = 0;
+	while (rooms && !val)
 	{
-		tmp = (t_room *)rooms->data;
-		done = !ft_strcmp(nbr, tmp->name);
-		//printf("room tmp->name %s\n", tmp->name);
+		room = (t_room *)rooms->data;
+		val = !ft_strcmp(nbr, room->name);
+		//printf("room room->name %s\n", room->name);
 		rooms = rooms->next;
 	}
-	//if (tmp && tmp->name)
-	//	printf("room tmp->name %s done|%d\n", tmp->name, done);
-	return (done ? tmp : 0);
+	//if (room && room->name)
+	//	printf("room room->name %s val|%d\n", room->name, val);
+	return (val ? room : 0);
 }
 
 t_room		*place_to_chamber(t_data *rooms, int direct)
 {
-	int		done;
-	t_room	*tmp;
+	int		val;
+	t_room	*room;
 
-	done = 0;
-	while (rooms && !done)
+	val = 0;
+	while (rooms && !val)
 	{
-		tmp = (t_room *)rooms->data;
-		done = tmp->flag == direct ? 1 : 0;
-		//printf("place_to_chamber %s done|%d\n", tmp->name, done);
+		room = (t_room *)rooms->data;
+		val = room->flag == direct ? 1 : 0;
+		//printf("place_to_chamber %s val|%d\n", room->name, val);
 		rooms = rooms->next;
 	}
-	//if (tmp)
-	//	printf("place_to_chamber %s done|%d\n", tmp->name, done);
-	return (done ? tmp : 0);
+	//if (room)
+	//	printf("place_to_chamber %s val|%d\n", room->name, val);
+	return (val ? room : 0);
 }
 
 static int			valid_path_cast(char *output)
 {
 	int		i;
+	int		k;
 
 	i = -1;
+	k = 0;
 	if (output[0] == 'L' || output[0] == '#')
 	{
 		printf("@@no\n");
@@ -336,23 +338,26 @@ static int			valid_path_cast(char *output)
 	while (ft_isprint1(output[++i]) && output[i] != '-');
 		//printf("!|%s|\n", output[i]);
 	if (output[i] == '-')
+	{
+		k++;
 		i++;
+	}
 	else
 	{
 		printf("valid no1\n");
 		return (0);
 	}
-	if (!ft_isprint1(output[i]))
+	if (!ft_isprint1(output[i]) && k != 1)
 	{
 		printf("valid no2\n");
 		return (0);
 	}
 	i -= 1;
-	while (ft_isprint1(output[++i]));
+	while (ft_isprint1(output[++i]) && output[i] != '-');
 		//printf("!|%s|\n", output[i]);
 	if (output[i] != '\0')
 	{
-		printf("err valid_path_casts\n");
+		printf("last err valid_path_casts\n");
 		return (0);
 	}
 	return (1);
@@ -736,11 +741,34 @@ t_ant		*lem_ant_struct(t_data *room, int ants)
 // 	}
 // }
 
+int		valid_rooms(t_data *lst)
+{
+	int		first;
+	int		last;
+	t_room	*room;
+
+	first = 0;
+	last = 0;
+	while (lst)
+	{
+		room = (t_room *)lst->data;
+		if (room->flag == 1)
+			first++;
+		if (room->flag == 3)
+			last++;
+		lst = lst->next;
+	}
+	//printf("first %d last %d\n", first, last);
+	return (first == 1 && last == 1 ? 1 : 0);
+}
+
 static int		lem_read_map(t_game *game)
 {
 	game->total = lem_get_ants();//ants count
 	//printf("game->total|%d|\n", game->total);	
 	if (game->total == 0 || lem_get_map(game))
+		return (0);
+	if (!valid_rooms(game->room_list))
 		return (0);
 	//recalc(game->path_list);
 	game->ant_list = lem_ant_struct(game->room_list, game->total);//set ants to start	
@@ -836,7 +864,7 @@ int			find_room(void *room, int last)
 		return (-1);
 	//printf("find_room current->flag %d\n", current->flag);
 	current->full = 1;
-	find = 2000000000;
+	find = 2147483647;
 	testing = current->paths;
 	//printf("testing %s\n", ((t_links *)testing->data)[0].link1);
 	//printf("go ahead\n");
@@ -852,7 +880,7 @@ int			find_room(void *room, int last)
 	}
 	current->full = 0;
 //	printf("find %d\n", find);
-	return (find == 2000000000 ? -1 : find);
+	return (find == 2147483647 ? -1 : find);
 }
 
 void		lem_play(t_game *game)
@@ -863,7 +891,7 @@ void		lem_play(t_game *game)
 	t_room	*tmp;
 	t_room	*next;
 
-	distance = 2000000000;
+	distance = 2147483647;
 	ls = game->ant_list->room->paths;
 	while (ls)
 	{
@@ -881,7 +909,7 @@ void		lem_play(t_game *game)
 		}
 		ls = ls->next;
 	}
-	if (distance < 2000000000)
+	if (distance < 2147483647)
 		move_ants(game->ant_list, next);
 }
 
