@@ -763,7 +763,7 @@ void	check(t_list *list)
 	//printf("list->content list->x|%d| list->y|%d|\n", list->x, list->y);
 	while (list)
 	{
-		printf("list->content x|%d| y|%d|\n", ((t_room *)list->content)[0].x, ((t_room *)list->content)[0].y);
+		//printf("list->content x|%d| y|%d|\n", ((t_room *)list->content)[0].x, ((t_room *)list->content)[0].y);
 		list = list->next;
 	}
 }
@@ -787,25 +787,25 @@ int			lemin_read(t_lemin *lemin)
 	lemin->rooms_done = 0;
 	while ((ret = get_next_line(0, &line)) > 0)
 	{
-		printf("line|%s|\n", line);
+		//printf("line|%s|\n", line);
 		if (read_command(line))
 		{
 			flag = (flag != NORMAL) ? flag : SET_FLAG(line);
 		}
 		else if (read_room(line) && !lemin->rooms_done)
 		{
-			printf("lemin_read room|%s|\n", line);
+			//printf("lemin_read room|%s|\n", line);
 			lemin->room_list = ft_lstpush(lemin->room_list, \
 											init_room(line, flag));
 			check(lemin->room_list);
-			printf("flag %d\n", flag);
+			//printf("flag %d\n", flag);
 			//printf("@@@ lemin->room_list->content|%d|\n", (int)(t_room *)lemin->room_list->content->x);
 			//printf("list->content|%d|\n", lemin->room_list->content->x);
 			flag = NORMAL;
 		}
 		else if (read_path(line, lemin->room_list) && (lemin->rooms_done = 1))
 		{
-			printf("lemin_read path|%s|\n", line);
+			//printf("lemin_read path|%s|\n", line);
 			lemin->path_list = ft_lstpush(lemin->path_list, init_path(line));
 			//check2(lemin->path_list);
 		}
@@ -1198,7 +1198,7 @@ void	check1(t_list *list)
 	while (list)
 	{
 		//printf("yep\n");
-		printf("path->door1|%s|\n", ((t_path *)list->content)[0].door1);
+		//printf("path->door1|%s|\n", ((t_path *)list->content)[0].door1);
 		list = list->next;
 	}
 }
