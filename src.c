@@ -512,10 +512,10 @@ int		lem_get_map(t_game *game)
 	game->done = 0;
 	while ((val = get_next_line(0, &output)))
 	{
-		game->map = ft_joinstr(game->map, output);
-		tmp = ft_strjoin(game->map, "\n");
-		ft_strdel(&game->map);
-		game->map = tmp;
+		tmp = ft_joinstr(game->map, output);
+		game->map = ft_strjoin(tmp, "\n");
+		//ft_strdel(&game->map);
+		//game->map = tmp;
 		ft_strdel(&tmp);
 		//printf("game->map %s |%s|\n", game->map, output);
 		//game->map = ft_lem_push(game->map, ft_joinstr(output, "\n"));
