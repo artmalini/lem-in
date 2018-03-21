@@ -468,18 +468,28 @@ char	*ft_joinstr(char *str1, char *str2)
 	int		len1;
 	int		len2;
 
-	if (!str1)
-		str1 = ft_strnew(0);
-	len1 = ft_strlen(str1);
-	len2 = ft_strlen(str2);
-	if (!(str3 = (char *)malloc(sizeof(str3) * ((len1 + len2) + 1))))
-		return (NULL);
-	*str3 = 0;
-	str3 = ft_strcat(ft_strcat(str3, str1), str2);
+	if (str1)
+	{
+		len1 = ft_strlen(str1);
+		len2 = ft_strlen(str2);
+		//printf("str1 %s str2 %s\n", str1, str2);
+		if (!(str3 = (char *)malloc(sizeof(str3) * ((len1 + len2) + 1))))
+			return (NULL);
+		*str3 = 0;
+		str3 = ft_strcat(ft_strcat(str3, str1), str2);
+		free(str1);
+		return (str3);
+	}
+	else
+	{
+		str3 = ft_strdup(str2);
+		return (str3);
+	}
+	//printf("STR3 %s\n", str3);
 	//str3 = ft_strcat(str3, ft_strdup("\n"));
 	//free(str1);
 	//free(str2);
-	return (str3);
+	
 }
 
 // char	*ft_joinstr(char *str, char *n)
@@ -496,14 +506,18 @@ int		lem_get_map(t_game *game)
 	int		val;
 	int		status;
 	char	*output;
+	char	*tmp;
 
 	status = 2;
 	game->done = 0;
 	while ((val = get_next_line(0, &output)))
 	{
 		game->map = ft_joinstr(game->map, output);
-		game->map = ft_joinstr(game->map, "\n");
-		//printf("game->map %s\n", game->map);
+		tmp = ft_strjoin(game->map, "\n");
+		ft_strdel(&game->map);
+		game->map = tmp;
+		ft_strdel(&tmp);
+		//printf("game->map %s |%s|\n", game->map, output);
 		//game->map = ft_lem_push(game->map, ft_joinstr(output, "\n"));
 		//printf("&&&&&&&&&&&&&&get->map %s\n", ft_joinstr(output, "\n"));
 		if (check_hash(output))
@@ -839,13 +853,14 @@ int		lem_read_map(t_game *game)
 	// 	printf("##### %s", (char *)tmp->data);
 	// 	tmp = tmp->next;
 	// }
-	char *tmp = game->map;
-	while (*tmp)
-	{
-		//printf("yyyyy\n");
-		printf("%c", *tmp);
-		tmp++;
-	}
+
+	// char *tmp = game->map;
+	// while (*tmp)
+	// {
+	// 	//printf("yyyyy\n");
+	// 	printf("%c", *tmp);
+	// 	tmp++;
+	// }
 	return (1);
 }
 
@@ -857,6 +872,7 @@ void		lem_struct(t_game *game)
 	game->ant_list = NULL;
 	game->room_list = NULL;
 	game->path_list = NULL;
+	game->map = NULL;
 	//return (lem);
 }
 
@@ -1185,30 +1201,32 @@ void		lem_free(t_game *game)
 		}
 		if (game->ant_list)
 			ft_memdel((void **)&game->ant_list);
+		if (game->map)
+			ft_strdel(&game->map);
 		ft_memdel((void **)&game);
 	}
 }
 
-void		print_room(void *data)
-{
-	t_room	*room;
+// void		print_room(void *data)
+// {
+// 	t_room	*room;
 
-	if (data != NULL)
-	{
-		room = (t_room *)data;
-		if (room->flag == 1)
-			ft_putstr("##start\n");
-		else if (room->flag == 3)
-			ft_putstr("##end\n");
-		ft_putstr(room->name);
-		ft_putchar(' ');
-		ft_putnbr(room->x);
-		ft_putchar(' ');
-		ft_putnbr(room->y);
-	}
-	ft_putchar('\n');
-	return ;
-}
+// 	if (data != NULL)
+// 	{
+// 		room = (t_room *)data;
+// 		if (room->flag == 1)
+// 			ft_putstr("##start\n");
+// 		else if (room->flag == 3)
+// 			ft_putstr("##end\n");
+// 		ft_putstr(room->name);
+// 		ft_putchar(' ');
+// 		ft_putnbr(room->x);
+// 		ft_putchar(' ');
+// 		ft_putnbr(room->y);
+// 	}
+// 	//ft_putchar('\n');
+// 	return ;
+// }
 
 void		print_path(void *data)
 {
@@ -1226,9 +1244,11 @@ void		lem_print_map(t_game *game)
 {
 	ft_putnbr(game->total);
 	ft_putchar('\n');
-	lem_lst_foreach(game->room_list, print_room);
-	lem_lst_foreach(game->path_list, print_path);
+	ft_putstr(game->map);
 	ft_putchar('\n');
+	//lem_lst_foreach(game->room_list, print_room);
+	//lem_lst_foreach(game->path_list, print_path);
+	//ft_putchar('\n');
 	return ;
 }
 
@@ -1294,7 +1314,7 @@ int				main(int argc, char **argv)
 	else
 		lem_parse(argc, argv);
 
-	//system("leaks lem-in");
+	system("leaks lem-in");
 	//close(fd);	
 	return (0);
 }
