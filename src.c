@@ -47,6 +47,7 @@ typedef struct			s_game
 	t_ant				*ant_list;
 	t_data				*room_list;
 	t_data				*path_list;
+	char				*map;
 }						t_game;
 
 void	lem_lst_foreach(t_data *lst, void (*f)());
@@ -168,7 +169,7 @@ int		lem_get_ants(void)
 	i = -1;
 	if (get_next_line(0, &output) != 1)
 		lem_error(3);
-	//printf("@|%s|\n", output);
+	printf("@|%s|\n", output);
 	
 	while (ft_isdigit(output[++i]));
 	//i -= 1;
@@ -252,8 +253,28 @@ t_links		*build_paths(char *out)
 	return (val);
 }*/
 
+/*int			lem_coord_links(char *out)
+{
+	int		y;
+	int		x;
+	int		val;
+	char	**path;
+
+	val = 1;
+	path = ft_strsplit(out, ' ');
+	x = ft_atoi(path[1]);
+	y = ft_atoi(path[2]);
+	if (x == y)
+		val = 0;
+	lem_split_free(path);
+	return (val);
+}*/
+
 int			lem_valid_room(char *out)
 {
+	char	*str;
+
+	str = out;
 	printf("valid |%s|\n", out);
 	if (out[0] == 'L' || out[0] == '#')
 	{
@@ -276,6 +297,7 @@ int			lem_valid_room(char *out)
 		return (0);
 	while (lem_symbols(*out))
 		out++;
+	//if (*out != '\0' || !lem_coord_links(str))
 	if (*out != '\0')
 		return (0);
 	//printf("!!!!!!!!!!!!!!!room valid |%s|\n", out);
@@ -439,6 +461,36 @@ void		map_check_hash(char **output, int *status)
 	}
 }
 
+
+char	*ft_joinstr(char *str1, char *str2)
+{
+	char	*str3;
+	int		len1;
+	int		len2;
+
+	if (!str1)
+		str1 = ft_strnew(0);
+	len1 = ft_strlen(str1);
+	len2 = ft_strlen(str2);
+	if (!(str3 = (char *)malloc(sizeof(str3) * ((len1 + len2) + 1))))
+		return (NULL);
+	*str3 = 0;
+	str3 = ft_strcat(ft_strcat(str3, str1), str2);
+	//str3 = ft_strcat(str3, ft_strdup("\n"));
+	//free(str1);
+	//free(str2);
+	return (str3);
+}
+
+// char	*ft_joinstr(char *str, char *n)
+// {
+// 	char	*out;
+
+// 	out = ft_strjoin(str, n);
+// 	printf("OUT %s\n", out);
+// 	return (out);
+// }
+
 int		lem_get_map(t_game *game)
 {
 	int		val;
@@ -448,7 +500,12 @@ int		lem_get_map(t_game *game)
 	status = 2;
 	game->done = 0;
 	while ((val = get_next_line(0, &output)))
-	{		
+	{
+		game->map = ft_joinstr(game->map, output);
+		game->map = ft_joinstr(game->map, "\n");
+		//printf("game->map %s\n", game->map);
+		//game->map = ft_lem_push(game->map, ft_joinstr(output, "\n"));
+		//printf("&&&&&&&&&&&&&&get->map %s\n", ft_joinstr(output, "\n"));
 		if (check_hash(output))
 			map_check_hash(&output, &status);
 		else if (lem_valid_room(output) && !game->done)
@@ -467,7 +524,7 @@ int		lem_get_map(t_game *game)
 	}
 	ft_memdel((void **)&output);
 	printf("end map val %d\n", val);
-	return (game->done == 1 ? val : 1);
+	return (val);
 }
 
 void	check1(t_data *list, int room)
@@ -773,6 +830,22 @@ int		lem_read_map(t_game *game)
 	//recalc(game->path_list);
 	game->ant_list = lem_ant_struct(game->room_list, game->total);//set ants to start	
 	//printf("ttttt\n");
+
+	// t_data *tmp;
+	// tmp = game->map;
+	// while (tmp)
+	// {
+	// 	printf("yyyyy\n");
+	// 	printf("##### %s", (char *)tmp->data);
+	// 	tmp = tmp->next;
+	// }
+	char *tmp = game->map;
+	while (*tmp)
+	{
+		//printf("yyyyy\n");
+		printf("%c", *tmp);
+		tmp++;
+	}
 	return (1);
 }
 
@@ -1159,6 +1232,31 @@ void		lem_print_map(t_game *game)
 	return ;
 }
 
+//int			valid_room_path(t_data *, links->link1)
+
+void		lem_not_cmplinks(t_game *game)
+{
+	t_room	*room;
+	t_links	*links;
+	t_data	*tmp_room;
+	t_data	*tmp_path;
+
+	tmp_room = game->room_list;
+	while (tmp_room)
+	{
+		tmp_path = game->path_list;
+		room = (t_room *)tmp_room->data;
+		while (tmp_path)
+		{
+			links = (t_links *)tmp_path->data;
+			if (!ft_strcmp(links->link1, links->link2))
+				lem_error(3);
+			tmp_path = tmp_path->next;
+		}
+		tmp_room = tmp_room->next;
+	}
+}
+
 void		lem_parse(int argc, char **argv)
 {
 	t_game	*game;
@@ -1175,6 +1273,7 @@ void		lem_parse(int argc, char **argv)
 	}
 
 	lem_set_path(game); ///////////
+	lem_not_cmplinks(game);
 	//lem_valid_room2();//// first end last room IMPORTANT
 	lem_print_map(game);
 	lem_player(game);
@@ -1185,11 +1284,9 @@ void		lem_parse(int argc, char **argv)
 
 int				main(int argc, char **argv)
 {
-	//int		fd;
-
 	//printf("%d\n", argc);
 	//if (argc > 1)
-	//	lem_error(2);
+	//	lem_error(2);	
 	if (argc < 1)
 		lem_error(1);
 	//else if(!(fd = open(argv[0], O_RDONLY)))
