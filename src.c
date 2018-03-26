@@ -47,6 +47,7 @@ typedef struct			s_game
 	t_ant				*ant_data;
 	t_data				*room_data;
 	t_data				*path_data;
+	char				*best_data;
 	char				*map;
 }						t_game;
 
@@ -885,6 +886,7 @@ void		lem_struct(t_game *game)
 	game->room_data = NULL;
 	game->path_data = NULL;
 	game->map = NULL;
+	game->best_data = NULL;
 	//return (lem);
 }
 
@@ -975,7 +977,7 @@ int			find_room(void *room, int last)
 		if ((old_find = find_room(search->data, last)) < find && old_find != -1)
 		{
 			//printf("old_find %d %s\n", old_find, ((t_links *)search->data)[0].link1);
-			find = 1 + old_find;
+			find = 1 + old_find;			
 		}
 		search = search->next;
 	}
@@ -984,6 +986,8 @@ int			find_room(void *room, int last)
 	return (find == 2147483647 ? -1 : find);
 }
 
+		//tmp = ft_joinstr(game->map, output);
+		//game->map = ft_strjoin(tmp, "\n");
 void		ants_role(t_game *game)
 {
 	int		result;
@@ -1006,6 +1010,8 @@ void		ants_role(t_game *game)
 				//printf("newpath %d\n", result);
 				calc = result;
 				next = tmp;
+				printf("tmp->name %s\n", game->best_data);
+				game->best_data = ft_joinstr(game->best_data, tmp->name);
 			}
 		}
 		//printf("@\n");
@@ -1271,11 +1277,13 @@ void		lem_print_path(t_game *game)
 		while (tmp_path)
 		{
 			links = (t_links *)tmp_path->data;
-			if (!ft_strcmp(links->link1, room->name))
+			if (!ft_strcmp(links->link1, room->name) &&
+				lem_review(game, links->link1))
 			{
 				printf("links->link2 %s\n", links->link2);
 			}
-			if (!ft_strcmp(links->link2, room->name))
+			if (!ft_strcmp(links->link2, room->name) &&
+				lem_review(game, links->link2))
 			{
 				printf("links->link1 %s\n", links->link1);
 			}
@@ -1307,6 +1315,23 @@ void		lem_print_path1(t_game *game)
 		//printf("@\n");
 		ls = ls->next;
 	}
+}
+
+void		lem_print_path2(t_game *game)
+{
+	ft_putstr(game->best_data);
+	// t_data *best;
+	// t_room	*room;
+
+	// best = game->best_data;
+	// printf("lem_print_path2\n");
+	// while (best)
+	// {
+	// 	printf("!!!!\n");
+	// 	room = (t_room *)best->data;
+	// 	printf("ROOM %s\n", room->name);		
+	// 	best = best->next;
+	// }
 }
 
 
@@ -1371,11 +1396,12 @@ void		lem_parse(int argc, char **argv)
 	lem_not_cmplinks(game);
 	//lem_valid_room2();//// first end last room IMPORTANT
 	lem_print_map(game);	
-	lem_print_path(game);
+	// lem_print_path(game);
 
-	game->ant_data += 2;
-	lem_print_path1(game);
-	game->ant_data -= 2;
+	// game->ant_data += 2;
+	// lem_print_path1(game);
+	// game->ant_data -= 2;
+	lem_print_path2(game);
 
 	lem_player(game);
 	lem_free(game);
