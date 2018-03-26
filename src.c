@@ -1256,25 +1256,32 @@ void		lem_free(t_game *game)
 	return ;
 }*/
 
-void		lem_print_path(t_data *ls)
+void		lem_print_path(t_game *game)
 {
-	t_room	*tmp;
-	t_data	*path;
-	t_room	*nm;
+	t_room	*room;
+	t_links	*links;
+	t_data	*tmp_room;
+	t_data	*tmp_path;
 
-	while (ls)
+	tmp_room = game->room_data;
+	while (tmp_room)
 	{
-		tmp = (t_room *)ls->data;
-		path = (t_data *)tmp->paths;
-		while (path)
+		tmp_path = game->path_data;
+		room = (t_room *)tmp_room->data;
+		while (tmp_path)
 		{
-			nm = (t_room *)path->data;
-			ft_putstr(nm->name);
-			ft_putchar('\n');
-			path = path->next;
+			links = (t_links *)tmp_path->data;
+			if (!ft_strcmp(links->link1, room->name))
+			{
+				printf("links->link2 %s\n", links->link2);
+			}
+			if (!ft_strcmp(links->link2, room->name))
+			{
+				printf("links->link1 %s\n", links->link1);
+			}
+			tmp_path = tmp_path->next;
 		}
-		printf("h\n");	
-		ls = ls->next;
+		tmp_room = tmp_room->next;
 	}
 }
 
@@ -1364,7 +1371,7 @@ void		lem_parse(int argc, char **argv)
 	lem_not_cmplinks(game);
 	//lem_valid_room2();//// first end last room IMPORTANT
 	lem_print_map(game);	
-	lem_print_path(game->ant_data->room->paths);
+	lem_print_path(game);
 
 	game->ant_data += 2;
 	lem_print_path1(game);
