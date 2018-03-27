@@ -7,6 +7,7 @@
 # define INVALID_MAP 3
 # define NO_SOLUTION 4
 # define MEMMORY 5
+//# define color(x) ({"\033[40", "\033[41"};)
 
 typedef	struct		s_data
 {
@@ -43,11 +44,13 @@ typedef struct			s_game
 {
 	int					total;
 	int					done;
+	int					visual;
+	int					map_hide;
 	//long int			moves;
 	t_ant				*ant_data;
 	t_data				*room_data;
 	t_data				*path_data;
-	char				*best_data;
+	//char				*best_data;
 	char				*map;
 }						t_game;
 
@@ -96,14 +99,47 @@ void		lem_error(int error)
 	exit(1);
 }
 
+void		print_header(void)
+{
+	ft_putstr("                .-              -`                \n");
+    ft_putstr("               `-                -`               \n");
+    ft_putstr("               -                  -               \n");
+    ft_putstr("              .`                  ..              \n");
+    ft_putstr("              -                    -              \n");
+    ft_putstr("              -       .syys.       -              \n");
+    ft_putstr("              :://::-:dddddd:-:://::              \n");
+    ft_putstr("                    :dhhhhhhd:                    \n");
+    ft_putstr("                    oddhhhdddo                    \n");
+    ft_putstr("           .``..`   +dhhddddm+   `..``.           \n");
+    ft_putstr("                -o  `+yddddy+` `o.                \n");
+    ft_putstr("                 -/:`.hyhhdd.`:/.                 \n");
+    ft_putstr("             `:::+//yoddhdddoy//+:::`             \n");
+    ft_putstr("           ./:`   /y+-:dhdd:-+y:   `//.           \n");
+    ft_putstr("         ..`        .:sdhdds:.        ..`         \n");
+    ft_putstr("     .```      -/++o++//hd+/++o++/-      ```.     \n");
+    ft_putstr("               +     .oyddyo.     +               \n");
+    ft_putstr("               o`   :dhoydddd:   .+               \n");
+    ft_putstr("               /-  .dhyyhhhddm.  :/               \n");
+    ft_putstr("               --  odhsshddddmo  :-               \n");
+    ft_putstr("              `-   sdhssyhdddds   -`              \n");
+    ft_putstr("              :    +dhhyhddddm+    :              \n");
+    ft_putstr("             -`    `yddhddddmy`    `-             \n");
+    ft_putstr("           .-        oddddddo        -.           \n");
+    ft_putstr("          .`          `+hh+`          `.          \n\n");
+}
+
 void		param_error(char *arg, char *argv)
 {
-	ft_putstr("error: Argument ");
+	// ft_putstr("\033[31m\n");
+	// print_header();
+ //    ft_putstr("\033[0m\n");
+
+	ft_putstr("ERROR: Argument ");
 	ft_putstr(arg);
 	ft_putstr(" is invalid!");
 	ft_putstr(" Try run ");
 	ft_putstr(argv);
-	ft_putstr(" < map\n!");
+	ft_putstr(" < map!\n");
 	exit(1);
 }
 
@@ -489,10 +525,6 @@ char	*ft_joinstr(char *str1, char *str2)
 		str3 = ft_strdup(str2);
 		return (str3);
 	}
-	//printf("STR3 %s\n", str3);
-	//str3 = ft_strcat(str3, ft_strdup("\n"));
-	//free(str1);
-	//free(str2);
 	
 }
 
@@ -886,7 +918,9 @@ void		lem_struct(t_game *game)
 	game->room_data = NULL;
 	game->path_data = NULL;
 	game->map = NULL;
-	game->best_data = NULL;
+	game->visual = 0;
+	game->map_hide = 0;
+	//game->best_data = NULL;
 	//return (lem);
 }
 
@@ -930,19 +964,43 @@ int		ants_ready(t_ant *ants, int numbrs)
 //void		role_ant(t_game *game)
 //{}
 
-void	print_ant(t_ant *ant)
+char	*color(int x)
 {
-	ft_putstr("\033[31m");
+	char	*rgb[] = {"\x1B[91m", "\x1B[92m", "\x1B[93m", "\x1B[94m", "\x1B[95m", "\x1B[96m"};
+
+	//rgb[0] = "\x1B[91m";
+	//rgb[1] = "\033[41";
+
+	//rgb = {"\033[40", "\033[41"};
+	return (rgb[x]);
+}
+
+void	print_ant(t_ant *ant, int vis)
+{
+	if (vis == 1)
+	{
+		//printf("ant->id %d |%d|\n", ant->id, ant->id % 6);
+		//ft_putstr("\033");
+		ft_putstr(color(ant->id % 6));
+		//ft_putstr("Something\n");
+		//ft_putstr("\033[31m");
+	}
 	ft_putchar('L');
 	ft_putnbr(ant->id);
 	ft_putchar('-');
+	if (vis == 1 && ant->room->flag == 2)
+	{
+			ft_putstr("\x1B[90m");
+	}
 	ft_putstr(ant->room->name);
 	ft_putchar(' ');
+	if (vis == 1)
+		ft_putstr("\033[0m");
 	return ;
 }
 
 
-void	move_ants(t_ant *ant, t_room *room)
+void	move_ants(t_ant *ant, t_room *room, int vis)
 {
 	//printf("before ant->room->ant %d\n", ant->room->ant);
 	ant->room->ant = 0;
@@ -951,7 +1009,7 @@ void	move_ants(t_ant *ant, t_room *room)
 	//printf("ANT ant->room %s\n",(char *)ant->room->name);
 	ant->room = room;
 	ant->room->ant = 1;
-	print_ant(ant);
+	print_ant(ant, vis);
 	//game->moves += 1;///not important
 	return ;
 }
@@ -1010,15 +1068,15 @@ void		ants_role(t_game *game)
 				//printf("newpath %d\n", result);
 				calc = result;
 				next = tmp;
-				printf("tmp->name %s\n", game->best_data);
-				game->best_data = ft_joinstr(game->best_data, tmp->name);
+				//game->best_data = ft_joinstr(game->best_data, tmp->name);
+				//printf("tmp->name %s\n", game->best_data);
 			}
 		}
 		//printf("@\n");
 		ls = ls->next;
 	}
 	if (calc < 2147483647)
-		move_ants(game->ant_data, next);
+		move_ants(game->ant_data, next, game->visual);
 }
 
 	// t_room	*room;
@@ -1317,32 +1375,24 @@ void		lem_print_path1(t_game *game)
 	}
 }
 
-void		lem_print_path2(t_game *game)
-{
-	ft_putstr(game->best_data);
-	// t_data *best;
-	// t_room	*room;
-
-	// best = game->best_data;
-	// printf("lem_print_path2\n");
-	// while (best)
-	// {
-	// 	printf("!!!!\n");
-	// 	room = (t_room *)best->data;
-	// 	printf("ROOM %s\n", room->name);		
-	// 	best = best->next;
-	// }
-}
+// void		lem_print_path2(t_game *game)
+// {
+// 	//ft_putstr(game->best_data);
+// 	printf("game->best_data|%s|\n", game->best_data);
+// }
 
 
 void		lem_print_map(t_game *game)
 {
-	ft_putstr("\033[31m");
+	if (game->visual)
+		ft_putstr("\033[31m");
 	ft_putnbr(game->total);
 	ft_putchar('\n');
-	ft_putstr("\033[36m");
+	if (game->visual)
+		ft_putstr("\033[36m");
 	ft_putstr(game->map);
-	ft_putstr("\033[37m");
+	if (game->visual)
+		ft_putstr("\033[0m");
 	ft_putchar('\n');
 
 	// ft_putnbr(game->total);
@@ -1378,15 +1428,33 @@ void		lem_not_cmplinks(t_game *game)
 	}
 }
 
+void		arg_parser(t_game *game, int argc, char **argv)
+{
+	int		i;
+
+	i = 1;
+	while (--argc)
+	{
+		if (ft_strequ(argv[i], "-v"))
+			game->visual = 1;
+		else if (ft_strequ(argv[i], "-h"))
+			game->map_hide = 1;
+		else
+			param_error(argv[1], argv[0]);
+		i++;
+	}
+}
+
 void		lem_parse(int argc, char **argv)
 {
 	t_game	*game;
 
-	while (--argc)
-		param_error(argv[1], argv[0]);
+	//while (--argc)
+	//	param_error(argv[1], argv[0]);
 	if(!(game = (t_game *)malloc(sizeof(t_game))))
 		lem_error(5);
 	lem_struct(game);
+	arg_parser(game, argc, argv);
 	if (!lem_read_map(game))
 	{
 		lem_free(game);
@@ -1395,15 +1463,22 @@ void		lem_parse(int argc, char **argv)
 	lem_set_path(game); ///////////
 	lem_not_cmplinks(game);
 	//lem_valid_room2();//// first end last room IMPORTANT
-	lem_print_map(game);	
+	if (game->map_hide == 0)
+		lem_print_map(game);
+	if (game->visual == 1)
+	{
+		ft_putstr("\033[31m");
+		print_header();
+    	ft_putstr("\033[0m\n");
+	}
 	// lem_print_path(game);
 
 	// game->ant_data += 2;
 	// lem_print_path1(game);
 	// game->ant_data -= 2;
-	lem_print_path2(game);
 
 	lem_player(game);
+	//lem_print_path2(game); //path rooms names
 	lem_free(game);
 	//ft_memdel((void**)&game);
 }
