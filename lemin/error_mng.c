@@ -15,7 +15,20 @@
 void		param_error(char *arg, char *argv)
 {
 	if (arg && argv)
-		ft_putstr("ERROR\n");
+	{
+		display_header();
+		ft_putstr("ERROR: Argument ");
+		ft_putstr(arg);
+		ft_putstr(" is invalid!\n");
+		ft_putstr("   You can choose folowing input:\n");
+		ft_putstr(" \033[33m./lem-in -v < map_name\033[0m");
+		ft_putstr("   To show Lemin in color\n");
+		ft_putstr(" \033[33m./lem-in -h < map_name\033[0m");
+		ft_putstr("   To hide map from output\n");
+		ft_putstr("\033[33m ");
+		ft_putstr(argv);
+		ft_putstr(" < map_name\033[0m   To run without arguments\n");
+	}
 	exit(1);
 }
 

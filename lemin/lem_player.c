@@ -67,31 +67,64 @@ int			check_turn(t_ant *ants)
 	return (0);
 }
 
-void		lem_player(t_game *game)
+void		lem_role(t_game *game, int i, int turn, int temp_nbr)
 {
-	int		i;
-	int		turn;
-
-	i = -1;
-	turn = 1;
-	ants_ready(game->ant_data, game->total);
-	while (turn && !lem_last_ant(game->ant_data, game->total))
+	while (turn && !lem_last_ant(game->ant_data, temp_nbr))
 	{
 		i = -1;
 		turn = 0;
-		while (++i < game->total)
+		while (++i < temp_nbr)
 		{
 			if (check_turn(game->ant_data + i))
 			{
 				turn = 1;
-				game->ant_data += i;
+				game->ant_data += i;;
 				ants_role(game);
 				game->ant_data -= i;
 			}
 		}
 		ft_putchar('\n');
 	}
+	if (game->ant_data)
+		ft_memdel((void **)&game->ant_data);
+}
+
+void		lem_continue_play(t_game *game, int temp_nbr, int tmp_total, int nbr)
+{
+	int		i;
+	int		turn;
+
+	i = 0;
 	turn = 1;
-	if (last_isects(game->ant_data, game->total))
-		lem_error();
+	while (tmp_total < game->total)
+	{
+		if (nbr >= 10)
+		{
+			temp_nbr = 10;
+			nbr -= 10;
+			game->ant_data = lem_ant_struct(game->room_data, 10, tmp_total, tmp_total + 10);
+			tmp_total += 10;
+		}
+		else
+		{
+			game->ant_data = lem_ant_struct(game->room_data, nbr, tmp_total, game->total);
+			temp_nbr = nbr;
+			tmp_total = game->total;
+		}
+		ants_ready(game->ant_data, temp_nbr);
+		lem_role(game, i, turn, temp_nbr);
+		turn = 1;
+	}
+}
+
+void		lem_player(t_game *game)
+{	
+	int		temp_nbr;	
+	int 	nbr;
+	int 	tmp_total;	
+	
+	temp_nbr = 0;
+	tmp_total = 0;
+	nbr = game->total;
+	lem_continue_play(game, temp_nbr, tmp_total, nbr);
 }

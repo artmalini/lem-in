@@ -65,6 +65,8 @@ void		lem_free(t_game *game)
 {
 	if (game)
 	{		
+		if (game->ant_data)
+			ft_memdel((void **)&game->ant_data);
 		if (game->room_data)
 		{
 			lem_lst_foreach(game->room_data, free_rooms);
@@ -75,35 +77,6 @@ void		lem_free(t_game *game)
 			lem_lst_foreach(game->path_data, free_paths);
 			lem_lst_data_free(game->path_data);
 		}
-		if (game->ant_data)
-			ft_memdel((void **)&game->ant_data);
 		ft_memdel((void **)&game);
 	}
-}
-
-t_data		*ft_lem_push(t_data *map, void *param)
-{
-	t_data	*res;
-	t_data	*tmp;
-
-	if (!param)
-		lem_error();
-	if (!(res = (t_data *)malloc(sizeof(t_data))))
-		lem_error();
-	if (!map)
-	{
-		res->data = param;
-		res->next = NULL;
-		map = res;
-	}
-	else
-	{
-		tmp = map;
-		while (tmp->next)
-			tmp = tmp->next;
-		res->data = param;
-		res->next = NULL;
-		tmp->next = res;
-	}
-	return (map);
 }

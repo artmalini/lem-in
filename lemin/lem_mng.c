@@ -64,7 +64,7 @@ t_room		*place_to_chamber(t_data *rooms, int direct)
 	return (val ? room : 0);
 }
 
-t_ant		*lem_ant_struct(t_data *room, int ants)
+t_ant		*lem_ant_struct(t_data *room, int ants, int str, int fin)
 {
 	int		i;
 	t_ant	*insects;
@@ -72,12 +72,14 @@ t_ant		*lem_ant_struct(t_data *room, int ants)
 	i = 0;
 	if (!(insects = (t_ant *)malloc(sizeof(t_ant) * ants)))
 		lem_error();
-	while (i < ants)
+	while (str < fin)
 	{
-		insects[i].id = i + 1;
+		insects[i].id = str + 1;
 		insects[i].ant_turn = 0;
+		insects[i].last = NULL;
 		insects[i].room = place_to_chamber(room, 1);
 		i++;
+		str++;
 	}
 	return (insects);
 }

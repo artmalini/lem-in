@@ -13,7 +13,7 @@
 NAME = lem-in
 
 INC = -I ./libft
-FLAGS = -Wall -Wextra -Werror -O2 -g -std=c99
+FLAGS = -Wall -Wextra -Werror -O2
 LIB_DIR = libft
 
 SRC_FILES = src.c
@@ -37,6 +37,7 @@ $(NAME): $(OBJ)
 
 %.o: %.c
 	@gcc $(FLAGS) $(INC) -c -o $@ $<
+	#@gcc $(FLAGS) $(INC) -c -o $@ $<
 
 clean:
 	@/bin/rm -f $(OBJ)

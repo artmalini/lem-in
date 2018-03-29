@@ -17,7 +17,8 @@ FLAGS = -Wall -Wextra -Werror -O2
 LIB_DIR = libft
 
 SRC_FILES = main.c ants_role.c error_mng.c lem_mng.c lem_player.c lem_read_map.c \
-			lem_set_path.c lists_mng.c 
+			lem_set_path.c lists_mng.c lem_print.c lem_mng_lst_push.c lem_parse.c \
+			lem_chk_path_room.c
 
 RED		= \033[31m
 GREEN	= \033[32m
@@ -37,7 +38,9 @@ $(NAME): $(OBJ)
 	#@echo " $(CYAN)$(NAME) $(GREY)generated \xF0\x9F\x98\xBA"
 
 %.o: %.c
-	@gcc $(FLAGS) $(INC) -c -o $@ $<
+	@gcc $(INC) -c -o $@ $<
+#%.o: %.c
+#	@gcc $(FLAGS) $(INC) -c -o $@ $<
 
 clean:
 	@/bin/rm -f $(OBJ)
