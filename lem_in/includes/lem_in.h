@@ -15,7 +15,7 @@
 
 # include "../libft/libft.h"
 # include "get_next_line.h"
-# define SWARM 100000
+# define SWARM 200000
 
 typedef	struct			s_data
 {
