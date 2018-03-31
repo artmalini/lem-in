@@ -12,16 +12,6 @@
 
 #include "includes/lem_in.h"
 
-int			ants_ready(t_ant *ants, int numbrs)
-{
-	int		i;
-
-	i = -1;
-	while (++i < numbrs)
-		ants[i].ant_turn = 0;
-	return (1);
-}
-
 int			lem_last_ant(t_ant *ants, int numbrs)
 {
 	int		i;
@@ -33,19 +23,6 @@ int			lem_last_ant(t_ant *ants, int numbrs)
 			return (0);
 	}
 	return (1);
-}
-
-int		last_isects(t_ant *ants, int numbrs)
-{
-	int		i;
-
-	i = -1;
-	while (++i < numbrs && ants != 0)
-	{
-		if (ants[i].room->flag != 2)
-			return (ants[i].id);
-	}
-	return (0);
 }
 
 int			check_turn(t_ant *ants)
@@ -60,7 +37,7 @@ int			check_turn(t_ant *ants)
 	{
 		path = (t_room *)list->data;
 		if (path->flag == 2 || (!path->ant && path !=
-			ants->last && path->flag != 1))	
+			ants->last && path->flag != 1))
 			return (1);
 		list = list->next;
 	}
@@ -78,7 +55,7 @@ void		lem_role(t_game *game, int i, int turn, int temp_nbr)
 			if (check_turn(game->ant_data + i))
 			{
 				turn = 1;
-				game->ant_data += i;;
+				game->ant_data += i;
 				ants_role(game);
 				game->ant_data -= i;
 			}
@@ -89,42 +66,46 @@ void		lem_role(t_game *game, int i, int turn, int temp_nbr)
 		ft_memdel((void **)&game->ant_data);
 }
 
-void		lem_continue_play(t_game *game, int temp_nbr, int tmp_total, int nbr)
+void		lem_str_play(t_game *game, int temp_nbr, int tm, int nbr)
 {
 	int		i;
 	int		turn;
 
 	i = 0;
 	turn = 1;
-	while (tmp_total < game->total)
+	while (tm < game->total)
 	{
-		if (nbr >= 10)
+		if (nbr >= SWARM)
 		{
-			temp_nbr = 10;
-			nbr -= 10;
-			game->ant_data = lem_ant_struct(game->room_data, 10, tmp_total, tmp_total + 10);
-			tmp_total += 10;
+			temp_nbr = SWARM;
+			nbr -= SWARM;
+			game->ant_data = l_ant_s(game->room_data, SWARM, tm, tm + SWARM);
+			tm += SWARM;
 		}
 		else
 		{
-			game->ant_data = lem_ant_struct(game->room_data, nbr, tmp_total, game->total);
+			game->ant_data = l_ant_s(game->room_data, nbr, tm, game->total);
 			temp_nbr = nbr;
-			tmp_total = game->total;
+			tm = game->total;
 		}
 		ants_ready(game->ant_data, temp_nbr);
 		lem_role(game, i, turn, temp_nbr);
-		turn = 1;
 	}
 }
 
 void		lem_player(t_game *game)
-{	
-	int		temp_nbr;	
-	int 	nbr;
-	int 	tmp_total;	
-	
+{
+	int		temp_nbr;
+	int		nbr;
+	int		tmp_total;
+
 	temp_nbr = 0;
 	tmp_total = 0;
 	nbr = game->total;
-	lem_continue_play(game, temp_nbr, tmp_total, nbr);
+	lem_str_play(game, temp_nbr, tmp_total, nbr);
+	if (game->visual)
+	{
+		ft_putstr("\033[32m");
+		ft_putstr("All ants swarm leaving their nest successfully!\033[0m\n");
+	}
 }

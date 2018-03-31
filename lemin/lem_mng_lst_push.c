@@ -1,15 +1,28 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lem_mng_lst_push.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: amakhiny <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/03/31 11:58:12 by amakhiny          #+#    #+#             */
+/*   Updated: 2018/03/31 11:58:16 by amakhiny         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "includes/lem_in.h"
 
-int		lem_get_ants(void)
+int			lem_get_ants(void)
 {
 	int		i;
 	int		val;
 	char	*output;
 
-	i = -1;
+	i = 0;
 	if (get_next_line(0, &output) != 1)
 		lem_error();
-	while (ft_isdigit(output[++i]));
+	while (ft_isdigit(output[i]))
+		i++;
 	if (output[i] != '\0')
 		lem_error();
 	val = ft_atoi(output);
@@ -67,7 +80,7 @@ t_links		*build_paths(char *out)
 	return (road);
 }
 
-t_data		*ft_lem_push(t_data *map, void *param)
+t_data		*lem_push(t_data *map, void *param)
 {
 	t_data	*res;
 	t_data	*tmp;

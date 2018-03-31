@@ -64,7 +64,7 @@ void		free_paths(void *data)
 void		lem_free(t_game *game)
 {
 	if (game)
-	{		
+	{
 		if (game->ant_data)
 			ft_memdel((void **)&game->ant_data);
 		if (game->room_data)
@@ -77,6 +77,8 @@ void		lem_free(t_game *game)
 			lem_lst_foreach(game->path_data, free_paths);
 			lem_lst_data_free(game->path_data);
 		}
+		if (game->map)
+			ft_strdel(&game->map);
 		ft_memdel((void **)&game);
 	}
 }

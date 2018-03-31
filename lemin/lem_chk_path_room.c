@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lem_chk_path_room.c                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: amakhiny <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/03/31 11:55:24 by amakhiny          #+#    #+#             */
+/*   Updated: 2018/03/31 11:55:28 by amakhiny         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "includes/lem_in.h"
 
 int			lem_valid_room(char *out)
@@ -31,32 +43,30 @@ int			valid_path_cast(char *output)
 	int		i;
 	int		k;
 
-	i = -1;
+	i = 0;
 	k = 0;
 	if (output[0] == 'L' || output[0] == '#')
 		return (0);
 	if (!lem_symbols(*output))
 		return (0);
-	while (lem_symbols(output[++i]) && output[i] != '-');
-	if (output[i] == '-')
+	while (lem_symbols(output[i]) && output[i] != '-')
+		i++;
+	while (output[i] == '-')
 	{
 		k++;
 		i++;
 	}
-	else
-		return (0);
 	if (!lem_symbols(output[i]) && k != 1)
 		return (0);
-	i -= 1;
-	while (lem_symbols(output[++i]) && output[i] != '-');
+	while (lem_symbols(output[i]) && output[i] != '-')
+		i++;
 	if (output[i] != '\0')
 		return (0);
 	return (1);
 }
 
-
 int			lem_valid_path(t_data *rooms, char *output)
-{	
+{
 	int		val;
 	char	**path;
 	t_links nbr;
@@ -75,7 +85,7 @@ int			lem_valid_path(t_data *rooms, char *output)
 	return (val);
 }
 
-int		valid_check(t_data *map, char *output)
+int			valid_check(t_data *map, char *output)
 {
 	char	**str;
 	char	*name;
@@ -88,11 +98,12 @@ int		valid_check(t_data *map, char *output)
 	yy = ft_atoi(str[2]);
 	while (map->next)
 	{
-		if ((xx == ((t_room *)map->data)[0].x && yy ==((t_room *)map->data)[0].y)
-			|| !ft_strcmp(name, ((t_room *)map->data)[0].name))
+		if ((xx == ((t_room *)map->data)[0].x && yy ==
+			((t_room *)map->data)[0].y) ||
+			!ft_strcmp(name, ((t_room *)map->data)[0].name))
 		{
 			ft_strdel(&name);
-		 	return (0);	
+			return (0);
 		}
 		map = map->next;
 	}

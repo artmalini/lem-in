@@ -64,7 +64,7 @@ t_room		*place_to_chamber(t_data *rooms, int direct)
 	return (val ? room : 0);
 }
 
-t_ant		*lem_ant_struct(t_data *room, int ants, int str, int fin)
+t_ant		*l_ant_s(t_data *room, int ants, int str, int fin)
 {
 	int		i;
 	t_ant	*insects;

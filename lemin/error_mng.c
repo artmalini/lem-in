@@ -27,7 +27,7 @@ void		param_error(char *arg, char *argv)
 		ft_putstr("   To hide map from output\n");
 		ft_putstr("\033[33m ");
 		ft_putstr(argv);
-		ft_putstr(" < map_name\033[0m   To run without arguments\n");
+		ft_putstr(" < map_name\033[0m To run without arguments\n");
 	}
 	exit(1);
 }

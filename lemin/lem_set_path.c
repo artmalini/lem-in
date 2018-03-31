@@ -12,7 +12,7 @@
 
 #include "includes/lem_in.h"
 
-int		fin_lem_review2(t_data *path, char *link1)
+int			fin_lem_review2(t_data *path, char *link1)
 {
 	while (path)
 	{
@@ -23,7 +23,7 @@ int		fin_lem_review2(t_data *path, char *link1)
 	return (0);
 }
 
-int		lem_review2(t_game *game, char *link1, int flag)
+int			lem_review2(t_game *game, char *link1, int flag)
 {
 	t_data	*path;
 
@@ -35,7 +35,7 @@ int		lem_review2(t_game *game, char *link1, int flag)
 	return (0);
 }
 
-int		fin_lem_review1(t_data *path, char *link2)
+int			fin_lem_review1(t_data *path, char *link2)
 {
 	while (path)
 	{
@@ -46,7 +46,7 @@ int		fin_lem_review1(t_data *path, char *link2)
 	return (0);
 }
 
-int		lem_review1(t_game *game, char *link2, int flag)
+int			lem_review1(t_game *game, char *link2, int flag)
 {
 	t_data	*path;
 
@@ -75,12 +75,12 @@ void		lem_set_path(t_game *game)
 			links = (t_links *)tmp_path->data;
 			if (!ft_strcmp(links->link1, room->name) &&
 				lem_review1(game, links->link2, room->flag))
-					room->paths = ft_lem_push(room->paths,
-						room_name(game->room_data, links->link2));
+				room->paths = lem_push(room->paths,
+					room_name(game->room_data, links->link2));
 			if (!ft_strcmp(links->link2, room->name) &&
 				lem_review2(game, links->link1, room->flag))
-					room->paths = ft_lem_push(room->paths,
-						room_name(game->room_data, links->link1));
+				room->paths = lem_push(room->paths,
+					room_name(game->room_data, links->link1));
 			tmp_path = tmp_path->next;
 		}
 		tmp_room = tmp_room->next;

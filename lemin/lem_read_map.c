@@ -12,7 +12,7 @@
 
 #include "includes/lem_in.h"
 
-int		check_hash(char *output)
+int			check_hash(char *output)
 {
 	if (*output != '#' || ft_strequ("##", output))
 		return (0);
@@ -32,7 +32,7 @@ void		map_check_hash(char **output, int *status)
 		*status = *status;
 }
 
-char	*ft_joinstr(char *str1, char *str2)
+char		*ft_joinstr(char *str1, char *str2)
 {
 	char	*str3;
 	int		len1;
@@ -46,37 +46,41 @@ char	*ft_joinstr(char *str1, char *str2)
 			return (NULL);
 		*str3 = 0;
 		str3 = ft_strcat(ft_strcat(str3, str1), str2);
+		free(str1);
 		return (str3);
 	}
 	else
-		return (ft_strdup(str2));	
+	{
+		str3 = ft_strdup(str2);
+		return (str3);
+	}
 }
 
-int		lem_get_map(t_game *game, int flag)
+int			lem_get_map(t_game *game, int fl, int done, int val)
 {
-	int		val;
-	char	*output;
+	char	*out;
+	char	*tmp;
 
-	game->done = 0;
-	while ((val = get_next_line(0, &output)))
+	while ((val = get_next_line(0, &out)))
 	{
-		game->map = ft_joinstr(game->map, output);
-		game->map = ft_joinstr(game->map, "\n");
-		if (check_hash(output))
-			map_check_hash(&output, &flag);
-		else if (lem_valid_room(output) && !game->done)
+		tmp = ft_joinstr(game->map, out);
+		game->map = ft_strjoin(tmp, "\n");
+		ft_strdel(&tmp);
+		if (check_hash(out))
+			map_check_hash(&out, &fl);
+		else if (lem_valid_room(out) && !done)
 		{
-			game->room_data = ft_lem_push(game->room_data, build_rooms(output, flag));
-			if (!valid_check(game->room_data, output))
+			game->room_data = lem_push(game->room_data, build_rooms(out, fl));
+			if (!valid_check(game->room_data, out))
 				break ;
-			flag = 3;
+			fl = 3;
 		}
-		else if (lem_valid_path(game->room_data, output) && (game->done = 1))
-			game->path_data = ft_lem_push(game->path_data, build_paths(output));
+		else if (lem_valid_path(game->room_data, out) && (done = 1))
+			game->path_data = lem_push(game->path_data, build_paths(out));
 		else
 			break ;
-		ft_memdel((void **)&output);
+		ft_memdel((void **)&out);
 	}
-	ft_memdel((void **)&output);
-	return (game->done == 1 ? val : 1);
+	ft_memdel((void **)&out);
+	return (val);
 }

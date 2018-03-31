@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lem_print.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: amakhiny <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/03/31 11:56:51 by amakhiny          #+#    #+#             */
+/*   Updated: 2018/03/31 11:57:04 by amakhiny         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "includes/lem_in.h"
 
 void		lem_print_map(t_game *game)
@@ -17,16 +29,16 @@ void		lem_print_map(t_game *game)
 
 void		display_header(void)
 {
-ft_putstr("\033[31m");  
-ft_putstr("                             #\n");
-ft_putstr(" ###                         ##\n");
-ft_putstr(" ###    ######## ##   ## ### ###  ##\n");
-ft_putstr(" ###             ### ### ### #### ##\n");
-ft_putstr(" ###     ####### ####### ### #######\n");
-ft_putstr(" ###     ###     ## # ## ### ### ###\n");
-ft_putstr(" ####### ####### ##   ## ### ###  ##\n");
-ft_putstr("                 ##                #\n");
-ft_putstr("\033[0m\n");
+	ft_putstr("\033[31m");
+	ft_putstr("                             #\n");
+	ft_putstr(" ###                         ##\n");
+	ft_putstr(" ###    ######## ##   ## ### ###  ##\n");
+	ft_putstr(" ###             ### ### ### #### ##\n");
+	ft_putstr(" ###     ####### ####### ### #######\n");
+	ft_putstr(" ###     ###     ## # ## ### ### ###\n");
+	ft_putstr(" ####### ####### ##   ## ### ###  ##\n");
+	ft_putstr("                 ##                #\n");
+	ft_putstr("\033[0m\n");
 }
 
 void		print_header_ant(void)

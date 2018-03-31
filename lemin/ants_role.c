@@ -13,10 +13,11 @@
 #include "includes/lem_in.h"
 
 /*
-* [91m - Red [92m - Green [93m - Yellow
-* [94m - Blue [95m Purple [96m - Cyan
+** [91m - Red [92m - Green [93m - Yellow
+** [94m - Blue [95m Purple [96m - Cyan
 */
-char	*color(int x)
+
+char		*color(int x)
 {
 	char	*rgb[6];
 
@@ -29,7 +30,7 @@ char	*color(int x)
 	return (rgb[x]);
 }
 
-void	print_ant(t_ant *ant, int vis)
+void		print_ant(t_ant *ant, int vis)
 {
 	if (vis == 1)
 		ft_putstr(color(ant->id % 6));
@@ -37,14 +38,13 @@ void	print_ant(t_ant *ant, int vis)
 	ft_putnbr(ant->id);
 	ft_putchar('-');
 	if (vis == 1 && ant->room->flag == 2)
-			ft_putstr("\x1B[90m");
+		ft_putstr("\x1B[90m");
 	ft_putstr(ant->room->name);
 	ft_putchar(' ');
 	if (vis == 1)
 		ft_putstr("\033[0m");
 	return ;
 }
-
 
 void		move_ants(t_ant *ant, t_room *room, int vis)
 {
