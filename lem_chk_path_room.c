@@ -14,9 +14,6 @@
 
 int			lem_valid_room(char *out)
 {
-	char	*str;
-
-	str = out;
 	if (out[0] == 'L' || out[0] == '#')
 		return (0);
 	while (lem_symbols(*out) && *out != '-')

@@ -45,7 +45,6 @@ int			lem_read_map(t_game *game)
 
 void		lem_not_cmplinks(t_game *game)
 {
-	t_room	*room;
 	t_links	*links;
 	t_data	*tmp_room;
 	t_data	*tmp_path;
@@ -54,7 +53,6 @@ void		lem_not_cmplinks(t_game *game)
 	while (tmp_room)
 	{
 		tmp_path = game->path_data;
-		room = (t_room *)tmp_room->data;
 		while (tmp_path)
 		{
 			links = (t_links *)tmp_path->data;

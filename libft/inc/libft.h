@@ -17,7 +17,7 @@
 # include <stdlib.h>
 # include <string.h>
 
-# include "../includes/get_next_line.h"
+# include "../../includes/get_next_line.h"
 
 typedef struct		s_list
 {
