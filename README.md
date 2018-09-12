@@ -1,5 +1,5 @@
 ## About
-![Alt text](https://github.com/artmalini/lem-in/res/ant.jpg "lem")
+![Alt text](https://github.com/artmalini/lem-in/tree/master/res/ant.jpeg "lem")
 
 The goal of this project is find quiqest path for ant swarm. All ants start in the first room according to map and start running
 to find exit. There should be manage traffic james and avoid that one room cannot contain more that one ant per move. All
@@ -19,7 +19,7 @@ $ make
 ```
 $ ./lem-in gdg
 ```
-![Alt text](https://github.com/artmalini/lem-in/res/lem_usage.jpg "lem usage")
+![Alt text](https://github.com/artmalini/lem-in/tree/master/res/lem_usage.jpg "lem usage")
 
 Then execute command
 ```
