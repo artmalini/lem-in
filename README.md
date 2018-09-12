@@ -19,7 +19,7 @@ $ make
 ```
 $ ./lem-in gdg
 ```
-![Alt text](https://github.com/artmalini/lem-in/blob/master/res/lem_usage.jpg "lem usage")
+![Alt text](https://github.com/artmalini/lem-in/blob/master/res/lem_usage.jpeg "lem usage")
 
 Then execute command
 ```
